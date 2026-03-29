@@ -1,0 +1,4 @@
+export const INJECT_TOKEN = {
+  ACCESS: Symbol('ACCESS_INJECT_TOKEN'),
+  REFRESH: Symbol('REFRESH_INJECT_TOKEN'),
+};
