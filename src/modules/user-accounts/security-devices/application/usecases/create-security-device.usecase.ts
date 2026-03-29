@@ -1,10 +1,5 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateSecurityDeviceDto } from '../../dto/create-security-device.dto';
-import {
-  SecurityDevice,
-  type SecurityDeviceModelType,
-} from '../../domain/security-device.entity';
-import { InjectModel } from '@nestjs/mongoose';
 import { SecurityDevicesRepository } from '../../repositories/security-devices.repository';
 import { Inject } from '@nestjs/common';
 import { INJECT_TOKEN } from '../../../constants/inject-token';
@@ -20,8 +15,6 @@ export class CreateSecurityDeviceCommand extends Command<void> {
 @CommandHandler(CreateSecurityDeviceCommand)
 export class CreateSecurityDeviceUseCase implements ICommandHandler<CreateSecurityDeviceCommand> {
   constructor(
-    @InjectModel(SecurityDevice.name)
-    private readonly SecurityDeviceModel: SecurityDeviceModelType,
     private readonly securityDevicesRepository: SecurityDevicesRepository,
     @Inject(INJECT_TOKEN.REFRESH)
     private readonly refreshTokenContext: JwtService,
@@ -31,7 +24,7 @@ export class CreateSecurityDeviceUseCase implements ICommandHandler<CreateSecuri
     const { id, deviceId, exp, iat } =
       this.refreshTokenContext.decode<RefreshTokenDto>(dto.refreshToken);
 
-    const securityDevice = this.SecurityDeviceModel.createInstance({
+    await this.securityDevicesRepository.create({
       ip: dto.ip,
       userId: id,
       deviceId,
@@ -39,7 +32,5 @@ export class CreateSecurityDeviceUseCase implements ICommandHandler<CreateSecuri
       exp,
       iat,
     });
-
-    await this.securityDevicesRepository.save(securityDevice);
   }
 }

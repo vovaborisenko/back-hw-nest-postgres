@@ -1,7 +1,9 @@
-import { IsMongoId } from 'class-validator';
-import { Types } from 'mongoose';
+import { IsNumber, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class BasePathParamsInputDto {
-  @IsMongoId()
-  id: Types.ObjectId;
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  id: number;
 }

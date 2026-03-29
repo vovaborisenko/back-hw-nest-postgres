@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { HttpStatus, INestApplication } from '@nestjs/common';
-import { invalidAuth, validAuth, validMongoId } from '../constants/common';
+import { invalidAuth, validAuth, validParamId } from '../constants/common';
 import { createUser, createUsers, userDto } from '../utils/user/user.util';
 import { initTestApp } from '../utils/core/init-test-app';
 import { deleteAllData } from '../utils/core/delete-all-data';
@@ -242,7 +242,7 @@ describe('UsersController (e2e)', () => {
 
     it('should return 404 when no user', async () => {
       await request(app)
-        .delete(`${FULL_PATH.USERS}/${validMongoId}`)
+        .delete(`${FULL_PATH.USERS}/${validParamId}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NOT_FOUND);
     });
@@ -254,6 +254,12 @@ describe('UsersController (e2e)', () => {
         .delete(`${FULL_PATH.USERS}/${user2.id}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NO_CONTENT);
+
+      // очередное удаление вернет 404
+      await request(app)
+        .delete(`${FULL_PATH.USERS}/${user2.id}`)
+        .set('Authorization', validAuth)
+        .expect(HttpStatus.NOT_FOUND);
     });
   });
 });

@@ -19,20 +19,19 @@ export class PasswordService {
     newPassword,
     recoveryCode,
   }: PasswordUpdateDto): Promise<void> {
-    const user = await this.usersRepository.findByRecoveryCode(recoveryCode);
+    const passwordHash = await this.bcryptService.createHash(newPassword);
+    const isSuccessUpdated = await this.usersRepository.updatePasswordHash(
+      recoveryCode,
+      passwordHash,
+    );
 
-    if (!user) {
+    if (!isSuccessUpdated) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'Invalid code',
         extensions: [{ field: 'code', message: 'code is not valid' }],
       });
     }
-
-    user.passwordHash = await this.bcryptService.createHash(newPassword);
-    user.recovery = null;
-
-    await this.usersRepository.save(user);
   }
 
   async sendRecoveryCode({ email }: PasswordRecoveryDto): Promise<void> {
@@ -42,13 +41,11 @@ export class PasswordService {
       return;
     }
 
-    user.createRecovery();
+    const recoveryCode = await this.usersRepository.createRecovery(user.id);
 
-    await this.usersRepository.save(user);
-
-    if (user.recovery?.code) {
+    if (recoveryCode) {
       this.emailService
-        .sendPasswordRecovery(email, user.recovery.code)
+        .sendPasswordRecovery(email, recoveryCode)
         .catch((error) => console.warn(error));
     }
   }

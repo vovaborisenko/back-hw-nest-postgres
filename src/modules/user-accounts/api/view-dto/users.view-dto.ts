@@ -1,4 +1,4 @@
-import type { UserDocument } from '../../domain/user.entity';
+import type { UserRaw } from '../../domain/user.entity';
 
 export class UserViewDto {
   id: string;
@@ -6,13 +6,13 @@ export class UserViewDto {
   email: string;
   createdAt: string;
 
-  static mapToView(user: UserDocument): UserViewDto {
+  static mapToView(user: UserRaw): UserViewDto {
     const dto = new UserViewDto();
 
-    dto.id = user._id.toString();
+    dto.id = user.id.toString();
     dto.email = user.email;
     dto.login = user.login;
-    dto.createdAt = user.createdAt.toISOString();
+    dto.createdAt = user.created_at.toISOString();
 
     return dto;
   }

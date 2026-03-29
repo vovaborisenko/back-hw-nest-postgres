@@ -1,23 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import type { UserDocument, UserModelType } from '../domain/user.entity';
-import { User } from '../domain/user.entity';
 import { UsersRepository } from '../infrastructure/users.repository';
 import type { CreateUserDto } from '../dto/create-user.dto';
 import { BcryptService } from './bcrypt.service';
-import { Types } from 'mongoose';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private readonly UserModel: UserModelType,
     private readonly usersRepository: UsersRepository,
     private readonly bcryptService: BcryptService,
   ) {}
 
-  async createUser(dto: CreateUserDto): Promise<UserDocument> {
+  async createUser(dto: CreateUserDto): Promise<{
+    id: number;
+    confirmationCode: string;
+  }> {
     const userByEmail = await this.usersRepository.findByEmail(dto.email);
 
     if (userByEmail) {
@@ -40,22 +38,21 @@ export class UsersService {
 
     const passwordHash = await this.bcryptService.createHash(dto.password);
 
-    const user = this.UserModel.createInstance({
+    return this.usersRepository.createUser({
       email: dto.email,
       login: dto.login,
       passwordHash,
     });
-
-    await this.usersRepository.save(user);
-
-    return user;
   }
 
-  async deleteUser(id: string | Types.ObjectId): Promise<void> {
-    const user = await this.usersRepository.findByIdOrNotFountFail(id);
+  async deleteUser(id: number): Promise<void> {
+    const user = await this.usersRepository.deleteUser(id);
 
-    user.makeDeleted();
-
-    await this.usersRepository.save(user);
+    if (!user) {
+      throw new DomainException({
+        code: DomainExceptionCode.NotFound,
+        message: 'User not found',
+      });
+    }
   }
 }

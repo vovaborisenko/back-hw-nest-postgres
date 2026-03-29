@@ -1,27 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { SecurityDeviceViewDto } from '../api/view-dto/security-device.view-dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
-import {
-  SecurityDevice,
-  type SecurityDeviceModelType,
-} from '../domain/security-device.entity';
+import { SecurityDeviceRaw } from '../domain/security-device.entity';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class SecurityDevicesQueryRepository {
   constructor(
-    @InjectModel(SecurityDevice.name)
-    private readonly SecurityDeviceModel: SecurityDeviceModelType,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
-  async findActiveByUserId(
-    userId: string | Types.ObjectId,
-  ): Promise<SecurityDeviceViewDto[]> {
-    const items = await this.SecurityDeviceModel.find({
-      userId: new Types.ObjectId(userId),
-      deletedAt: null,
-      expiredAt: { $gte: new Date() },
-    }).lean();
+  async findActiveByUserId(userId: number): Promise<SecurityDeviceViewDto[]> {
+    const items = await this.dataSource.query<SecurityDeviceRaw[]>(
+      `
+      SELECT * 
+      FROM security_devices
+      WHERE user_id = $1 AND deleted_at is null 
+    `,
+      [userId],
+    );
 
     return items.map((item) => SecurityDeviceViewDto.mapToView(item));
   }

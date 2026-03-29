@@ -1,4 +1,4 @@
 export interface DeleteSecurityDeviceDto {
-  userId: string;
+  userId: number;
   deviceId: string;
 }

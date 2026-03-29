@@ -1,4 +1,4 @@
 export interface CreateRefreshTokenDto {
-  id: string;
+  id: number;
   deviceId: string;
 }

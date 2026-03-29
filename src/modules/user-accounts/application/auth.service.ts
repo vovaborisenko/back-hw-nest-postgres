@@ -27,7 +27,7 @@ export class AuthService {
   ) {}
 
   async generateTokens(
-    userId: string,
+    userId: number,
     deviceId: string = crypto.randomUUID(),
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = await this.accessTokenContext.signAsync({ id: userId });
@@ -52,35 +52,31 @@ export class AuthService {
 
     const isPasswordCorrect = await this.bcryptService.compare(
       password,
-      user.passwordHash,
+      user.password_hash,
     );
 
     if (!isPasswordCorrect) {
       return null;
     }
 
-    return { id: user._id.toString() };
+    return { id: user.id };
   }
 
   async registration(dto: CreateUserDto): Promise<void> {
-    const user = await this.usersService.createUser(dto);
+    const { confirmationCode } = await this.usersService.createUser(dto);
 
     this.emailService
-      .sendConfirmationEmail(
-        user.email,
-        user.emailConfirmation.confirmationCode,
-      )
+      .sendConfirmationEmail(dto.email, confirmationCode)
       .catch((error) => console.warn(error));
   }
 
   async resendConfirmationCode(
     dto: RegistrationEmailResendingDto,
   ): Promise<void> {
-    const user = await this.usersRepository.findByEmail(dto.email);
+    const confirmationCode =
+      await this.usersRepository.updateEmailConfirmationCode(dto.email);
 
-    try {
-      user!.updateEmailConfirmation();
-    } catch {
+    if (!confirmationCode) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'Invalid email',
@@ -88,32 +84,23 @@ export class AuthService {
       });
     }
 
-    await this.usersRepository.save(user!);
-
     this.emailService
-      .sendConfirmationEmail(
-        user!.email,
-        user!.emailConfirmation.confirmationCode,
-      )
+      .sendConfirmationEmail(dto.email, confirmationCode)
       .catch((error) => console.warn(error));
   }
 
-  async confirmCode(dto: RegistrationConfirmationDto): Promise<void> {
-    const user = await this.usersRepository.findByEmailConfirmationCode(
+  async confirmEmail(dto: RegistrationConfirmationDto): Promise<void> {
+    const isSuccessConfirmed = await this.usersRepository.confirmEmail(
       dto.code,
     );
 
-    try {
-      user!.confirm();
-    } catch {
+    if (!isSuccessConfirmed) {
       throw new DomainException({
         code: DomainExceptionCode.BadRequest,
         message: 'Invalid code',
         extensions: [{ field: 'code', message: 'Code is not valid' }],
       });
     }
-
-    await this.usersRepository.save(user!);
   }
   //
   // async regenerateTokens({

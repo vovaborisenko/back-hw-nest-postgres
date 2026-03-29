@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { invalidAuth, validAuth, validMongoId } from '../constants/common';
+import { invalidAuth, validAuth, validParamId } from '../constants/common';
 import {
   createBlogAndHisPost,
   createBlogAndHisPosts,
@@ -72,7 +72,7 @@ describe('Posts API', () => {
       await request(app)
         .post(FULL_PATH.POSTS)
         .set('Authorization', validAuth)
-        .send({ ...postDto.create, blogId: validMongoId })
+        .send({ ...postDto.create, blogId: validParamId })
         .expect(HttpStatus.NOT_FOUND);
     });
 
@@ -143,7 +143,7 @@ describe('Posts API', () => {
   describe(`GET ${FULL_PATH.POSTS}/:id`, () => {
     it('should return 404 when no post', async () => {
       await request(app)
-        .get(`${FULL_PATH.POSTS}/${validMongoId}`)
+        .get(`${FULL_PATH.POSTS}/${validParamId}`)
         .expect(HttpStatus.NOT_FOUND);
     });
 
@@ -162,7 +162,7 @@ describe('Posts API', () => {
     it('should return 404 when no post', async () => {
       const blog = await createBlog(app);
       await request(app)
-        .put(`${FULL_PATH.POSTS}/${validMongoId}`)
+        .put(`${FULL_PATH.POSTS}/${validParamId}`)
         .set('Authorization', validAuth)
         .send({ ...postDto.update, blogId: blog.id })
         .expect(HttpStatus.NOT_FOUND);
@@ -174,7 +174,7 @@ describe('Posts API', () => {
       await request(app)
         .put(`${FULL_PATH.POSTS}/${post.id}`)
         .set('Authorization', validAuth)
-        .send({ ...postDto.create, blogId: validMongoId })
+        .send({ ...postDto.create, blogId: validParamId })
         .expect(HttpStatus.NOT_FOUND);
     });
 
@@ -205,7 +205,7 @@ describe('Posts API', () => {
     it('should return 404 when no post', async () => {
       const { token } = await createUserAndLogin(app);
       await request(app)
-        .put(`${FULL_PATH.POSTS}/${validMongoId}/like-status`)
+        .put(`${FULL_PATH.POSTS}/${validParamId}/like-status`)
         .set('Authorization', `Bearer ${token}`)
         .send(commentDto.updateLikeStatus[0])
         .expect(HttpStatus.NOT_FOUND);
@@ -376,7 +376,7 @@ describe('Posts API', () => {
   describe(`DELETE ${FULL_PATH.POSTS}/:id`, () => {
     it('should return 404 when no post', async () => {
       await request(app)
-        .delete(`${FULL_PATH.POSTS}/${validMongoId}`)
+        .delete(`${FULL_PATH.POSTS}/${validParamId}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NOT_FOUND);
     });

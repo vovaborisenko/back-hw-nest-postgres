@@ -142,7 +142,7 @@ export class AuthController {
   async registrationConfirmation(
     @Body() body: RegistrationConfirmationInputDto,
   ) {
-    await this.authService.confirmCode(body);
+    await this.authService.confirmEmail(body);
   }
 
   @UseGuards(ThrottlerGuard)

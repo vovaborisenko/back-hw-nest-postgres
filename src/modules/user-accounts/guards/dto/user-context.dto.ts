@@ -1,5 +1,5 @@
 export class UserContextDto {
-  id: string;
+  id: number;
 }
 
 export class RefreshTokenDto extends UserContextDto {
