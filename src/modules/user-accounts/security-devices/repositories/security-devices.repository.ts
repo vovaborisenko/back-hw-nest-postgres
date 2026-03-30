@@ -63,15 +63,20 @@ export class SecurityDevicesRepository {
   }
 
   async findById(id: string): Promise<SecurityDeviceRaw | null> {
-    const [user = null] = await this.dataSource.query<SecurityDeviceRaw[]>(
-      `
+    try {
+      const [user = null] = await this.dataSource.query<SecurityDeviceRaw[]>(
+        `
       SELECT * 
       FROM security_devices 
       WHERE id = $1`,
-      [id],
-    );
+        [id],
+      );
 
-    return user;
+      return user;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
   }
 
   async findByIdOrNotFountFail(id: string): Promise<SecurityDeviceRaw> {
