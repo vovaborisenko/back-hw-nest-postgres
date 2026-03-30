@@ -5,6 +5,17 @@ import { CreateSecurityDeviceDomainDto } from './dto/create-secirity-device.doma
 import { UpdateSecurityDeviceDomainDto } from './dto/update-secirity-device.domain-dto';
 import { parseJwtTime } from '../../../../core/utils/parse-jwt-time';
 
+export interface SecurityDeviceRaw {
+  id: string;
+  name: string;
+  ip: string | null;
+  user_id: number;
+  expired_at: Date;
+  issued_at: Date;
+  created_at: Date;
+  deleted_at: Date | null;
+}
+
 @Schema({ timestamps: true })
 export class SecurityDevice {
   @Prop({ type: String, required: true, unique: true })
@@ -33,7 +44,7 @@ export class SecurityDevice {
   static createInstance(dto: CreateSecurityDeviceDomainDto) {
     const device = new this();
 
-    device.userId = new Types.ObjectId(dto.userId);
+    // device.userId = new Types.ObjectId(dto.userId);
     device.deviceId = dto.deviceId;
     device.deviceName = dto.deviceName;
     device.expiredAt = parseJwtTime(dto.exp);

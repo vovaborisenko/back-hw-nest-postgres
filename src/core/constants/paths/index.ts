@@ -37,7 +37,7 @@ export const PATH = {
     LIKE_STATUS: `:${PARAM.ID}/like-status`,
   },
   USERS: {
-    PREFIX: 'users',
+    PREFIX: 'sa/users',
     SINGLE: `:${PARAM.ID}`,
   },
   TESTING: {

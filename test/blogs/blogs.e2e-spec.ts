@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { invalidAuth, validAuth, validMongoId } from '../constants/common';
+import { invalidAuth, validAuth, validParamId } from '../constants/common';
 import { blogDto, createBlog, createBlogs } from '../utils/blog/blog.util';
 import { HttpStatus, INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
@@ -99,7 +99,7 @@ describe('BlogsController (e2e)', () => {
   describe(`GET ${FULL_PATH.BLOGS}/:id`, () => {
     it('should return 404 when no blog', async () => {
       await request(app)
-        .get(`${FULL_PATH.BLOGS}/${validMongoId}`)
+        .get(`${FULL_PATH.BLOGS}/${validParamId}`)
         .expect(HttpStatus.NOT_FOUND);
     });
 
@@ -117,7 +117,7 @@ describe('BlogsController (e2e)', () => {
   describe(`PUT ${FULL_PATH.BLOGS}/:id`, () => {
     it('should return 404 when no blog', async () => {
       await request(app)
-        .put(`${FULL_PATH.BLOGS}/${validMongoId}`)
+        .put(`${FULL_PATH.BLOGS}/${validParamId}`)
         .set('Authorization', validAuth)
         .send(blogDto.update)
         .expect(HttpStatus.NOT_FOUND);
@@ -148,7 +148,7 @@ describe('BlogsController (e2e)', () => {
   describe(`DELETE ${FULL_PATH.BLOGS}/:id`, () => {
     it('should return 404 when no blog', async () => {
       await request(app)
-        .delete(`${FULL_PATH.BLOGS}/${validMongoId}`)
+        .delete(`${FULL_PATH.BLOGS}/${validParamId}`)
         .set('Authorization', validAuth)
         .expect(HttpStatus.NOT_FOUND);
     });
@@ -174,7 +174,7 @@ describe('BlogsController (e2e)', () => {
     describe(`POST ${FULL_PATH.BLOGS}/:id/posts`, () => {
       it('should return 400 if not exist blog', async () => {
         await request(app)
-          .post(`${FULL_PATH.BLOGS}/${validMongoId}/posts`)
+          .post(`${FULL_PATH.BLOGS}/${validParamId}/posts`)
           .set('Authorization', validAuth)
           .send(newPost)
           .expect(HttpStatus.NOT_FOUND);
@@ -199,7 +199,7 @@ describe('BlogsController (e2e)', () => {
     describe(`GET ${FULL_PATH.BLOGS}/:id/posts`, () => {
       it('should return 404 if not exist blog', async () => {
         await request(app)
-          .get(`${FULL_PATH.BLOGS}/${validMongoId}/posts`)
+          .get(`${FULL_PATH.BLOGS}/${validParamId}/posts`)
           .set('Authorization', validAuth)
           .expect(HttpStatus.NOT_FOUND);
       });

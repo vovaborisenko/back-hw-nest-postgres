@@ -1,6 +1,6 @@
 export interface CreateSecurityDeviceDomainDto {
   ip: string | null;
-  userId: string;
+  userId: number;
   deviceId: string;
   deviceName: string;
   exp: number;

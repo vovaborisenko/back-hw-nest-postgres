@@ -41,8 +41,10 @@ describe('Auth Controller (e2e)', () => {
     it('should return 200, refreshToken and accessToken when credentials is right', async () => {
       const { user, token, refreshToken } = await createUserAndLogin(app);
 
-      expect(new JwtService().decode(token)?.id).toBe(user.id);
-      expect(new JwtService().decode(refreshToken)?.id).toBe(user.id);
+      expect(new JwtService().decode(token)?.id.toString()).toBe(user.id);
+      expect(new JwtService().decode(refreshToken)?.id.toString()).toBe(
+        user.id,
+      );
     });
   });
 
@@ -150,10 +152,12 @@ describe('Auth Controller (e2e)', () => {
 
       expect(response.body.accessToken).not.toBe(token);
       expect(cookies.refreshToken).not.toBe(refreshToken);
-      expect(new JwtService().decode(response.body.accessToken)?.id).toBe(
+      expect(
+        new JwtService().decode(response.body.accessToken)?.id.toString(),
+      ).toBe(user.id);
+      expect(new JwtService().decode(cookies.refreshToken)?.id.toString()).toBe(
         user.id,
       );
-      expect(new JwtService().decode(cookies.refreshToken)?.id).toBe(user.id);
     });
 
     it('should return 401 on second request with the same token', async () => {
@@ -221,7 +225,7 @@ describe('Auth Controller (e2e)', () => {
       const { user, token } = await createUserAndLogin(app);
 
       // @ts-ignore
-      expect(new JwtService().decode(token)?.id).toBe(user.id);
+      expect(new JwtService().decode(token)?.id.toString()).toBe(user.id);
     });
   });
 

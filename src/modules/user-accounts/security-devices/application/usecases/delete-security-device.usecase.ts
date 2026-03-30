@@ -18,19 +18,15 @@ export class DeleteSecurityDeviceUseCase implements ICommandHandler<DeleteSecuri
 
   async execute({ dto }: DeleteSecurityDeviceCommand): Promise<void> {
     const securityDevice =
-      await this.securityDevicesRepository.findByOrNotFountFail({
-        deviceId: dto.deviceId,
-      });
+      await this.securityDevicesRepository.findByIdOrNotFountFail(dto.deviceId);
 
-    if (securityDevice.userId.toString() !== dto.userId) {
+    if (securityDevice.user_id !== dto.userId) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
         message: 'Not your device',
       });
     }
 
-    securityDevice.makeDeleted();
-
-    await this.securityDevicesRepository.save(securityDevice);
+    await this.securityDevicesRepository.deleteById(dto.deviceId);
   }
 }

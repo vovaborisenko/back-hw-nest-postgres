@@ -7,6 +7,15 @@ import {
 import { Recovery, RecoverySchema } from './recovery.schema';
 import { CreateUserDomainDto } from './dto/create-user.domain.dto';
 
+export interface UserRaw {
+  id: number;
+  email: string;
+  login: string;
+  password_hash: string;
+  created_at: Date;
+  delete_at: Date | null;
+}
+
 @Schema({ timestamps: true })
 export class User {
   @Prop({ type: String, required: true, unique: true })

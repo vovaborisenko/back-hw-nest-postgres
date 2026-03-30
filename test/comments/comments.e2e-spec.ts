@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { invalidAuth, validMongoId } from '../constants/common';
+import { invalidAuth, validParamId } from '../constants/common';
 import {
   commentDto,
   createComment,
@@ -54,7 +54,7 @@ describe('CommentsController (e2e)', () => {
   describe(`GET ${FULL_PATH.COMMENTS}/:id`, () => {
     it('should return 404 when no comment', async () => {
       await request(app)
-        .get(`${FULL_PATH.COMMENTS}/${validMongoId}`)
+        .get(`${FULL_PATH.COMMENTS}/${validParamId}`)
         .expect(HttpStatus.NOT_FOUND);
     });
 
@@ -73,7 +73,7 @@ describe('CommentsController (e2e)', () => {
     it('should return 404 when no comment', async () => {
       const { token } = await createUserAndLogin(app);
       await request(app)
-        .put(`${FULL_PATH.COMMENTS}/${validMongoId}`)
+        .put(`${FULL_PATH.COMMENTS}/${validParamId}`)
         .set('Authorization', `Bearer ${token}`)
         .send(commentDto.update)
         .expect(HttpStatus.NOT_FOUND);
@@ -110,7 +110,7 @@ describe('CommentsController (e2e)', () => {
     it('should return 404 when no comment', async () => {
       const { token } = await createUserAndLogin(app);
       await request(app)
-        .put(`${FULL_PATH.COMMENTS}/${validMongoId}/like-status`)
+        .put(`${FULL_PATH.COMMENTS}/${validParamId}/like-status`)
         .set('Authorization', `Bearer ${token}`)
         .send(commentDto.updateLikeStatus[0])
         .expect(HttpStatus.NOT_FOUND);
@@ -255,7 +255,7 @@ describe('CommentsController (e2e)', () => {
     it('should return 404 when no comment', async () => {
       const { token } = await createUserAndLogin(app);
       await request(app)
-        .delete(`${FULL_PATH.COMMENTS}/${validMongoId}`)
+        .delete(`${FULL_PATH.COMMENTS}/${validParamId}`)
         .set('Authorization', `Bearer ${token}`)
         .expect(HttpStatus.NOT_FOUND);
     });

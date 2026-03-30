@@ -1,26 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { QueryFilter, Types } from 'mongoose';
-import type { UserDocument, UserModelType } from '../domain/user.entity';
-import { User } from '../domain/user.entity';
+import { UserRaw } from '../domain/user.entity';
 import { UserViewDto } from '../api/view-dto/users.view-dto';
 import { GetUsersQueryParamsInputDto } from '../api/input-dto/get-users.query-params.input-dto';
 import { BasePaginatedViewDto } from '../../../core/api/view-dto/base.paginated.view-dto';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
 import { MeViewDto } from '../api/view-dto/me.view-dto';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(
-    @InjectModel(User.name) private readonly UserModel: UserModelType,
-  ) {}
+  constructor(@InjectDataSource() private readonly datasource: DataSource) {}
 
-  findById(id: string | Types.ObjectId): Promise<UserDocument | null> {
-    return this.UserModel.findById(id).where({ deletedAt: null });
+  async findById(id: number): Promise<UserRaw | null> {
+    const [user = null] = await this.datasource.query<UserRaw[]>(
+      `SELECT * 
+      FROM users 
+      WHERE id = $1 AND deleted_at is null`,
+      [id],
+    );
+
+    return user;
   }
 
-  async getMeOrFail(id: string | Types.ObjectId): Promise<MeViewDto> {
+  async getMeOrFail(id: number): Promise<MeViewDto> {
     const user = await this.findById(id);
 
     if (!user) {
@@ -33,9 +37,7 @@ export class UsersQueryRepository {
     return MeViewDto.mapToView(user);
   }
 
-  async getByIdOrNotFountFail(
-    id: string | Types.ObjectId,
-  ): Promise<UserViewDto> {
+  async getByIdOrNotFountFail(id: number): Promise<UserViewDto> {
     const user = await this.findById(id);
 
     if (!user) {
@@ -51,41 +53,49 @@ export class UsersQueryRepository {
   async getAll(
     query: GetUsersQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<UserViewDto[]>> {
-    const skip = query.skip;
-    const sort = {
-      [query.sortBy]: query.sortDirection,
-      _id: query.sortDirection,
-    };
-    const filter: QueryFilter<UserDocument> = { deletedAt: null };
+    const loginFilter = query.searchLoginTerm
+      ? `login ILIKE '%' || '${query.searchLoginTerm}' || '%'`
+      : '';
+    const emailFilter = query.searchEmailTerm
+      ? `email ILIKE '%' || '${query.searchEmailTerm}' || '%'`
+      : '';
+    const orFilter = [loginFilter, emailFilter].filter(Boolean).join(' OR ');
+    const orFilterInBrackets = orFilter ? `( ${orFilter} )` : '';
+    const andFilter = [orFilterInBrackets, 'deleted_at is NULL']
+      .filter(Boolean)
+      .join(' AND ');
+    const sortField = query.sortBy.replace(/([A-Z])/g, '_$1');
+    const sortByQuery = query.sortBy
+      ? `${sortField} ${query.sortDirection}`
+      : '';
+    const sortByDefault = `id ${query.sortDirection}`;
+    const orderBy = [sortByQuery, sortByDefault].filter(Boolean).join(', ');
 
-    const $or: QueryFilter<UserDocument>['$or'] = [];
-    if (query.searchLoginTerm) {
-      $or.push({
-        login: { $regex: query.searchLoginTerm, $options: 'i' },
-      });
-    }
-    if (query.searchEmailTerm) {
-      $or.push({
-        email: { $regex: query.searchEmailTerm, $options: 'i' },
-      });
-    }
-    if ($or.length) {
-      filter.$or = $or;
-    }
+    const dataQuery = this.datasource.query<UserRaw[]>(
+      `
+      SELECT * 
+      FROM users 
+      WHERE ${andFilter} 
+      ORDER BY ${orderBy} 
+      LIMIT $1 
+      OFFSET $2    `,
+      [query.pageSize, query.skip],
+    );
+    const countQuery = this.datasource.query<{ count: string }[]>(
+      `
+      SELECT COUNT(*) 
+      FROM users 
+      WHERE ${andFilter}
+    `,
+    );
+    console.log(await dataQuery, await countQuery);
 
-    const [items, totalCount] = await Promise.all([
-      this.UserModel.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(query.pageSize)
-        .lean(),
-      this.UserModel.countDocuments(filter),
-    ]);
+    const [items, [{ count }]] = await Promise.all([dataQuery, countQuery]);
 
     return BasePaginatedViewDto.mapToView({
       page: query.pageNumber,
       size: query.pageSize,
-      totalCount,
+      totalCount: Number(count),
       items: items.map((item) => UserViewDto.mapToView(item)),
     });
   }
