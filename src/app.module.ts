@@ -22,8 +22,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       inject: [CoreConfig],
       useFactory: (coreConfig: CoreConfig) => ({
         type: 'postgres',
-        host: 'localhost',
-        port: 5432,
+        host: coreConfig.postgresHost,
+        port: coreConfig.postgresPort,
         username: coreConfig.postgresUser,
         password: coreConfig.postgresPassword,
         database: coreConfig.postgresDB,
