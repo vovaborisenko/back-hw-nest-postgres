@@ -88,7 +88,6 @@ export class UsersQueryRepository {
       WHERE ${andFilter}
     `,
     );
-    console.log(await dataQuery, await countQuery);
 
     const [items, [{ count }]] = await Promise.all([dataQuery, countQuery]);
 

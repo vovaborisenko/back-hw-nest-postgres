@@ -27,32 +27,9 @@ export class CoreConfig {
   mongoURI: string;
 
   @IsNotEmpty({
-    message: 'Set Env variable POSTGRES_USER',
+    message: 'Set Env variable POSTGRES_URI',
   })
-  postgresUser: string;
-
-  @IsNotEmpty({
-    message: 'Set Env variable POSTGRES_PASSWORD',
-  })
-  postgresPassword: string;
-
-  @IsNotEmpty({
-    message: 'Set Env variable POSTGRES_DB',
-  })
-  postgresDB: string;
-
-  @IsNotEmpty({
-    message: 'Set Env variable POSTGRES_HOST',
-  })
-  postgresHost: string;
-
-  @IsNumber(
-    {},
-    {
-      message: 'Set Env variable POSTGRES_PORT',
-    },
-  )
-  postgresPort: number;
+  postgresURI: string;
 
   @IsEnum(Environments, {
     message:
@@ -93,11 +70,7 @@ export class CoreConfig {
     // Инициализация всех свойств в конструкторе
     this.port = Number(this.configService.get('PORT'));
     this.mongoURI = this.configService.get('MONGO_URI');
-    this.postgresUser = this.configService.get('POSTGRES_USER');
-    this.postgresPassword = this.configService.get('POSTGRES_PASSWORD');
-    this.postgresDB = this.configService.get('POSTGRES_DB');
-    this.postgresHost = this.configService.get('POSTGRES_HOST');
-    this.postgresPort = Number(this.configService.get('POSTGRES_PORT'));
+    this.postgresURI = this.configService.get('POSTGRES_URI');
     this.env = this.configService.get('NODE_ENV');
     this.includeTestingModule = configValidationUtility.convertToBoolean(
       this.configService.get('INCLUDE_TESTING_MODULE'),

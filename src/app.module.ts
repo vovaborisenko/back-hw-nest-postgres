@@ -22,13 +22,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       inject: [CoreConfig],
       useFactory: (coreConfig: CoreConfig) => ({
         type: 'postgres',
-        host: coreConfig.postgresHost,
-        port: coreConfig.postgresPort,
-        username: coreConfig.postgresUser,
-        password: coreConfig.postgresPassword,
-        database: coreConfig.postgresDB,
-        autoLoadEntities: true,
-        synchronize: true,
+        url: coreConfig.postgresURI,
       }),
     }),
     MongooseModule.forRootAsync({
