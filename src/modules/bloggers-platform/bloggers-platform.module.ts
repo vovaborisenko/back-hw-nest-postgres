@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { BlogsService } from './blogs/application/blogs.service';
 import { BlogsController } from './blogs/api/blogs.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from './blogs/domain/blog.entity';
@@ -19,6 +18,7 @@ import { Like, LikeSchema } from './likes/domain/like.entity';
 import { SetLikeUseCase } from './likes/application/usecases/set-like.usecase';
 import { LikesRepository } from './likes/infrastructure/likes.repository';
 import { PostsHandlers } from './posts/application';
+import { BlogHandlers } from './blogs/application';
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { PostsHandlers } from './posts/application';
     ]),
   ],
   providers: [
-    BlogsService,
+    ...BlogHandlers,
     BlogsRepository,
     BlogsQueryRepository,
     ...CommentsHandlers,

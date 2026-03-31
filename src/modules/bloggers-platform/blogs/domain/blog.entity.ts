@@ -3,6 +3,15 @@ import { HydratedDocument, Model } from 'mongoose';
 import { CreateBlogDomainDto } from './dto/create-blog.domain.dto';
 import { UpdateBlogDto } from '../dto/update-blog.dto';
 
+export interface BlogRaw {
+  id: number;
+  name: string;
+  description: string;
+  website_url: string;
+  created_at: Date;
+  deleted_at: Date | null;
+}
+
 @Schema({ timestamps: true })
 export class Blog {
   @Prop({ type: String, required: true })

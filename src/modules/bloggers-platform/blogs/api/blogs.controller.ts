@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { BasePaginatedViewDto } from '../../../../core/api/view-dto/base.paginated.view-dto';
 import { BlogViewDto } from './view-dto/blog.view-dto';
-import { BlogsService } from '../application/blogs.service';
 import { BlogsQueryRepository } from '../infrastructure/blogs.query-repository';
 import { GetBlogsQueryParamsInputDto } from './input-dto/get-blogs.query-params.input-dto';
 import { CreateBlogInputDto } from './input-dto/create-blog.input-dto';
@@ -28,16 +27,21 @@ import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.g
 import { JwtOptionalAuthGuard } from '../../../user-accounts/guards/bearer/jwt-optional-auth.guard';
 import { ExtractUserIfExistsFromRequestDecorator } from '../../../user-accounts/guards/decorators/param/extract-user-if-exists-from-request.decorator';
 import { UserContextDto } from '../../../user-accounts/guards/dto/user-context.dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreateBlogCommand } from '../application/usecases/create-blog.usecase';
+import { BasePathParamsInputDto } from '../../../../core/api/input-dto/base.path-params.input-dto';
+import { UpdateBlogCommand } from '../application/usecases/update-blog.usecase';
+import { DeleteBlogCommand } from '../application/usecases/delete-blog.usecase';
 
 const { PREFIX, SINGLE, POSTS } = PATH.BLOGS;
 
 @Controller(PREFIX)
 export class BlogsController {
   constructor(
-    private readonly blogService: BlogsService,
     private readonly blogsQueryRepository: BlogsQueryRepository,
     private readonly postService: PostsService,
     private readonly postsQueryRepository: PostsQueryRepository,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -49,14 +53,14 @@ export class BlogsController {
   }
 
   @Get(SINGLE)
-  getById(@Param(PARAM.ID) id: string): Promise<BlogViewDto> {
-    return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
+  getById(@Param() params: BasePathParamsInputDto): Promise<BlogViewDto> {
+    return this.blogsQueryRepository.getByIdOrNotFoundFail(params.id);
   }
 
   @UseGuards(BasicAuthGuard)
   @Post()
   async createBlog(@Body() dto: CreateBlogInputDto): Promise<BlogViewDto> {
-    const id = await this.blogService.createBlog(dto);
+    const id = await this.commandBus.execute(new CreateBlogCommand(dto));
 
     return this.blogsQueryRepository.getByIdOrNotFoundFail(id);
   }
@@ -65,17 +69,17 @@ export class BlogsController {
   @Put(SINGLE)
   @HttpCode(HttpStatus.NO_CONTENT)
   async updateBlog(
-    @Param(PARAM.ID) id: string,
+    @Param() params: BasePathParamsInputDto,
     @Body() dto: UpdateBlogInputDto,
   ): Promise<void> {
-    await this.blogService.updateBlog(id, dto);
+    await this.commandBus.execute(new UpdateBlogCommand(params.id, dto));
   }
 
   @UseGuards(BasicAuthGuard)
   @Delete(SINGLE)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteBlog(@Param(PARAM.ID) id: string): Promise<void> {
-    await this.blogService.deleteBlog(id);
+  async deleteBlog(@Param() params: BasePathParamsInputDto): Promise<void> {
+    await this.commandBus.execute(new DeleteBlogCommand(params.id));
   }
 
   @UseGuards(JwtOptionalAuthGuard)

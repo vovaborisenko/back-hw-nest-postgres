@@ -8,13 +8,13 @@ import { CreateUserDomainDto } from '../domain/dto/create-user.domain.dto';
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectDataSource() private readonly datasource: DataSource) {}
+  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
   async createUser(dto: CreateUserDomainDto): Promise<{
     id: number;
     confirmationCode: string;
   }> {
-    const [{ id }] = await this.datasource.query<{ id: number }[]>(
+    const [{ id }] = await this.dataSource.query<[{ id: number }]>(
       `
     INSERT INTO users (login, email, password_hash) 
     VALUES ($1, $2, $3)
@@ -22,10 +22,12 @@ export class UsersRepository {
     `,
       [dto.login, dto.email, dto.passwordHash],
     );
-    const [{ confirmation_code }] = await this.datasource.query<
-      {
-        confirmation_code: string;
-      }[]
+    const [{ confirmation_code }] = await this.dataSource.query<
+      [
+        {
+          confirmation_code: string;
+        },
+      ]
     >(
       `
     INSERT INTO email_confirmation (expiration_date, user_id) 
@@ -45,7 +47,7 @@ export class UsersRepository {
     recoveryCode: string,
     hash: string,
   ): Promise<boolean> {
-    const [, updatedCount] = await this.datasource.query<[[], number]>(
+    const [, updatedCount] = await this.dataSource.query<[void, number]>(
       `
     UPDATE users
     SET password_hash = $1
@@ -59,7 +61,7 @@ export class UsersRepository {
     );
 
     if (updatedCount > 0) {
-      await this.datasource.query<[[], number]>(
+      await this.dataSource.query<[[], number]>(
         `
         DELETE FROM user_recovery
         WHERE code = $1
@@ -72,9 +74,7 @@ export class UsersRepository {
   }
 
   async deleteUser(id: number): Promise<boolean> {
-    const [, deletedCount] = await this.datasource.query<
-      [{ id: number }[] | undefined, number]
-    >(
+    const [, deletedCount] = await this.dataSource.query<[void, number]>(
       `
     UPDATE users
     SET deleted_at = $2
@@ -87,7 +87,7 @@ export class UsersRepository {
   }
 
   async findById(id: number): Promise<UserRaw | null> {
-    const [user = null] = await this.datasource.query<UserRaw[]>(
+    const [user = null] = await this.dataSource.query<UserRaw[]>(
       `SELECT * 
       FROM users 
       WHERE id = $1 AND deleted_at is null`,
@@ -111,7 +111,7 @@ export class UsersRepository {
   }
 
   async findByLoginOrEmail(loginOrEmail: string): Promise<UserRaw | null> {
-    const [user = null] = await this.datasource.query<UserRaw[]>(
+    const [user = null] = await this.dataSource.query<UserRaw[]>(
       `SELECT * 
       FROM users 
       WHERE (login = $1 OR email = $1) AND deleted_at is null`,
@@ -122,7 +122,7 @@ export class UsersRepository {
   }
 
   async findByLogin(login: string): Promise<UserRaw | null> {
-    const [user = null] = await this.datasource.query<UserRaw[]>(
+    const [user = null] = await this.dataSource.query<UserRaw[]>(
       `SELECT *
        FROM users
        WHERE login = $1 AND deleted_at is null`,
@@ -133,7 +133,7 @@ export class UsersRepository {
   }
 
   async findByEmail(email: string): Promise<UserRaw | null> {
-    const [user = null] = await this.datasource.query<UserRaw[]>(
+    const [user = null] = await this.dataSource.query<UserRaw[]>(
       `SELECT * 
       FROM users 
       WHERE email = $1 AND deleted_at is null`,
@@ -144,7 +144,7 @@ export class UsersRepository {
   }
 
   async findByEmailConfirmationCode(code: string): Promise<UserRaw | null> {
-    const [user = null] = await this.datasource.query<UserRaw[]>(
+    const [user = null] = await this.dataSource.query<UserRaw[]>(
       `SELECT * 
       FROM users as u
       LEFT JOIN email_confirmation as ec ON u.id = ec.user_id
@@ -157,7 +157,7 @@ export class UsersRepository {
 
   async updateEmailConfirmationCode(email: string): Promise<string | null> {
     const newCode = crypto.randomUUID();
-    const [, updatedCount] = await this.datasource.query<[[], number]>(
+    const [, updatedCount] = await this.dataSource.query<[[], number]>(
       `
         UPDATE email_confirmation
         SET confirmation_code = $1
@@ -175,7 +175,7 @@ export class UsersRepository {
   }
 
   async confirmEmail(code: string): Promise<boolean> {
-    const [, updatedCount] = await this.datasource.query<[[], number]>(
+    const [, updatedCount] = await this.dataSource.query<[[], number]>(
       `
       UPDATE email_confirmation
       SET is_confirmed = true
@@ -188,7 +188,7 @@ export class UsersRepository {
   }
 
   async findByRecoveryCode(code: string): Promise<UserRaw | null> {
-    const [user = null] = await this.datasource.query<UserRaw[]>(
+    const [user = null] = await this.dataSource.query<UserRaw[]>(
       `SELECT * 
       FROM users as u
       LEFT JOIN user_recovery as ur ON u.id = ur.user_id
@@ -200,7 +200,7 @@ export class UsersRepository {
   }
 
   async createRecovery(userId: number): Promise<string> {
-    const [{ code }] = await this.datasource.query<{ code: string }[]>(
+    const [{ code }] = await this.dataSource.query<[{ code: string }]>(
       `
         INSERT INTO user_recovery (user_id, expired_at)
         VALUES ($1, $2)
