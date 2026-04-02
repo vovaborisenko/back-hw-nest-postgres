@@ -1,4 +1,4 @@
-import { PostDocument } from '../../domain/post.entity';
+import { PostDocument, PostRaw } from '../../domain/post.entity';
 import { BlogDocument } from '../../../blogs/domain/blog.entity';
 import { LikeStatus } from '../../../likes/enums/like-status';
 
@@ -17,3 +17,7 @@ export type AggregatedPostDto = Omit<PostDocument, 'blog'> & {
     newestLikes: NewestLike[];
   };
 };
+
+export interface PostViewRaw extends PostRaw {
+  blog_name: string;
+}

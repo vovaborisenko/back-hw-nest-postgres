@@ -21,8 +21,8 @@ export class CommentsQueryRepository {
   ) {}
   async findMany(
     query: GetCommentsQueryParamsInputDto,
-    postId?: string | Types.ObjectId,
-    likeAuthorId?: string | Types.ObjectId,
+    postId?: number,
+    likeAuthorId?: number,
   ): Promise<BasePaginatedViewDto<CommentViewDto[]>> {
     const skip = query.skip;
     const sort = {
