@@ -1,23 +1,16 @@
-import { PostDocument, PostRaw } from '../../domain/post.entity';
-import { BlogDocument } from '../../../blogs/domain/blog.entity';
+import { PostRaw } from '../../domain/post.entity';
 import { LikeStatus } from '../../../likes/enums/like-status';
 
-interface NewestLike {
-  addedAt: Date;
-  userId: string;
+export interface NewestLikeRaw {
+  addedAt: string;
+  userId: number;
   login: string;
 }
 
-export type AggregatedPostDto = Omit<PostDocument, 'blog'> & {
-  blog: BlogDocument;
-  extendedLikesInfo: {
-    likesCount: number;
-    dislikesCount: number;
-    myStatus: LikeStatus;
-    newestLikes: NewestLike[];
-  };
-};
-
 export interface PostViewRaw extends PostRaw {
   blog_name: string;
+  likes_count: number;
+  dislikes_count: number;
+  user_like_status: LikeStatus;
+  newest_likes: NewestLikeRaw[];
 }

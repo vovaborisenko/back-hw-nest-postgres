@@ -1,4 +1,7 @@
-import { PostViewRaw } from '../../infrastructure/dto/post.aggregated-dto';
+import {
+  NewestLikeRaw,
+  PostViewRaw,
+} from '../../infrastructure/dto/post.aggregated-dto';
 import { LikeStatus } from '../../../likes/enums/like-status';
 
 interface NewestLike {
@@ -33,19 +36,22 @@ export class PostViewDto {
     dto.blogName = post.blog_name;
     dto.createdAt = post.created_at.toISOString();
     dto.extendedLikesInfo = {
-      dislikesCount: 0,
-      likesCount: 0,
-      myStatus: LikeStatus.None,
-      newestLikes: [],
+      dislikesCount: post.dislikes_count,
+      likesCount: post.likes_count,
+      myStatus: post.user_like_status || LikeStatus.None,
+      newestLikes: post.newest_likes.map((item) =>
+        PostViewDto.newestLikeMapToView(item),
+      ),
     };
-    // dto.extendedLikesInfo = {
-    //   ...post.extendedLikesInfo,
-    //   newestLikes: post.extendedLikesInfo.newestLikes.map((like) => ({
-    //     ...like,
-    //     addedAt: like.addedAt.toISOString(),
-    //   })),
-    // };
 
     return dto;
+  }
+
+  protected static newestLikeMapToView(like: NewestLikeRaw): NewestLike {
+    return {
+      addedAt: like.addedAt,
+      userId: like.userId.toString(),
+      login: like.login,
+    };
   }
 }

@@ -18,7 +18,7 @@ export class AppService {
   async dropDatabase(): Promise<void> {
     const collections = this.connection.collections;
     await this.dataSource.query(`
-TRUNCATE TABLE users, email_confirmation, user_recovery, security_devices, blogs  
+TRUNCATE TABLE users, email_confirmation, user_recovery, security_devices, blogs, posts, comments, likes  
 RESTART IDENTITY CASCADE;`);
     await Promise.all(
       Object.values(collections).map((collection) => collection.deleteMany({})),

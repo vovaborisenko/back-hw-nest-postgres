@@ -1,11 +1,17 @@
-import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import {
+  Command,
+  CommandBus,
+  CommandHandler,
+  ICommandHandler,
+} from '@nestjs/cqrs';
 import { SetLikeCommand } from '../../../likes/application/usecases/set-like.usecase';
 import { SetLikeDto } from '../../../likes/dto/set-like.dto';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
+import { LikeParent } from '../../../likes/enums/like-parent';
 
-export class SetCommentLikeCommand extends SetLikeCommand {
-  constructor(public readonly dto: SetLikeDto) {
-    super(dto);
+export class SetCommentLikeCommand extends Command<void> {
+  constructor(public readonly dto: Omit<SetLikeDto, 'parentEntity'>) {
+    super();
   }
 }
 
@@ -17,7 +23,9 @@ export class SetCommentLikeUseCase implements ICommandHandler<SetCommentLikeComm
   ) {}
 
   async execute({ dto }: SetCommentLikeCommand): Promise<void> {
-    await this.commentsRepository.findByIdOrNotFound(dto.parent);
-    await this.commandBus.execute(new SetLikeCommand(dto));
+    await this.commentsRepository.findByIdOrNotFound(dto.parentId);
+    await this.commandBus.execute(
+      new SetLikeCommand({ ...dto, parentEntity: LikeParent.Comments }),
+    );
   }
 }

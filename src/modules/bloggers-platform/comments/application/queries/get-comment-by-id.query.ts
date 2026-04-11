@@ -1,12 +1,11 @@
 import { IQueryHandler, Query, QueryHandler } from '@nestjs/cqrs';
-import { Types } from 'mongoose';
 import { CommentViewDto } from '../../api/view-dto/comment.view-dto';
 import { CommentsQueryRepository } from '../../infrastructure/comments.query-repository';
 
 export class GetCommentByIdQuery extends Query<CommentViewDto> {
   constructor(
-    public readonly id: string | Types.ObjectId,
-    public readonly likeAuthorId?: string | Types.ObjectId,
+    public readonly id: number,
+    public readonly likeAuthorId?: number,
   ) {
     super();
   }

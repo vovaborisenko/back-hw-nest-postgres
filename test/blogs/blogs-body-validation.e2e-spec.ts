@@ -29,7 +29,7 @@ describe('Blogs API body validation', () => {
     await deleteAllData(app);
   });
 
-  describe(`POST ${FULL_PATH.BLOGS}`, () => {
+  describe(`POST ${FULL_PATH.SA_BLOGS}`, () => {
     it.each`
       field            | value              | message
       ${'name'}        | ${null}            | ${'name must be a string'}
@@ -51,7 +51,7 @@ describe('Blogs API body validation', () => {
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
         const response = await request(app)
-          .post(FULL_PATH.BLOGS)
+          .post(FULL_PATH.SA_BLOGS)
           .set('Authorization', validAuth)
           .send({ ...blogDto.create, [field]: value })
           .expect(HttpStatus.BAD_REQUEST);
@@ -65,7 +65,7 @@ describe('Blogs API body validation', () => {
     );
   });
 
-  describe(`PUT ${FULL_PATH.BLOGS}/:id`, () => {
+  describe(`PUT ${FULL_PATH.SA_BLOGS}/:id`, () => {
     it.each`
       field            | value              | message
       ${'name'}        | ${5}               | ${'name must be a string'}
@@ -86,7 +86,7 @@ describe('Blogs API body validation', () => {
         const blog = await createBlog(app);
 
         const response = await request(app)
-          .put(`${FULL_PATH.BLOGS}/${blog.id}`)
+          .put(`${FULL_PATH.SA_BLOGS}/${blog.id}`)
           .set('Authorization', validAuth)
           .send({ ...blogDto.update, [field]: value })
           .expect(HttpStatus.BAD_REQUEST);

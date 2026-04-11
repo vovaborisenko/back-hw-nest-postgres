@@ -5,6 +5,15 @@ import { User } from '../../../user-accounts/domain/user.entity';
 import { CreateCommentDomainDto } from './dto/create-comment.domain-dto';
 import { UpdateCommentDomainDto } from './dto/update-comment.domain-dto';
 
+export interface CommentRaw {
+  id: number;
+  content: string;
+  post_id: number;
+  user_id: number;
+  created_at: Date;
+  deleted_at: Date;
+}
+
 @Schema({ timestamps: true })
 export class Comment {
   @Prop({ type: String, required: true })
