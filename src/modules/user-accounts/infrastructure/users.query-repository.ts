@@ -11,10 +11,10 @@ import { DataSource } from 'typeorm';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(@InjectDataSource() private readonly datasource: DataSource) {}
+  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
   async findById(id: number): Promise<UserRaw | null> {
-    const [user = null] = await this.datasource.query<UserRaw[]>(
+    const [user = null] = await this.dataSource.query<UserRaw[]>(
       `SELECT * 
       FROM users 
       WHERE id = $1 AND deleted_at is null`,
@@ -71,7 +71,7 @@ export class UsersQueryRepository {
     const sortByDefault = `id ${query.sortDirection}`;
     const orderBy = [sortByQuery, sortByDefault].filter(Boolean).join(', ');
 
-    const dataQuery = this.datasource.query<UserRaw[]>(
+    const dataQuery = this.dataSource.query<UserRaw[]>(
       `
       SELECT * 
       FROM users 
@@ -81,14 +81,13 @@ export class UsersQueryRepository {
       OFFSET $2    `,
       [query.pageSize, query.skip],
     );
-    const countQuery = this.datasource.query<{ count: string }[]>(
+    const countQuery = this.dataSource.query<[{ count: string }]>(
       `
       SELECT COUNT(*) 
       FROM users 
       WHERE ${andFilter}
     `,
     );
-    console.log(await dataQuery, await countQuery);
 
     const [items, [{ count }]] = await Promise.all([dataQuery, countQuery]);
 

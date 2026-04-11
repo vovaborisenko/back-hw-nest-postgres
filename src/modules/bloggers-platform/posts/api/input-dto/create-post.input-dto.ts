@@ -1,6 +1,7 @@
-import { IsMongoId } from 'class-validator';
+import { IsNumber } from 'class-validator';
 import { CreatePostDto } from '../../dto/create-post.dto';
 import { IsStringLengthTrim } from '../../../../../core/decorators/validation/is-string-length-trim';
+import { Type } from 'class-transformer';
 
 export class CreatePostInputDto implements CreatePostDto {
   @IsStringLengthTrim(1, 30)
@@ -12,6 +13,7 @@ export class CreatePostInputDto implements CreatePostDto {
   @IsStringLengthTrim(1, 1000)
   content: string;
 
-  @IsMongoId()
-  blogId: string;
+  @Type(() => Number)
+  @IsNumber()
+  blogId: number;
 }

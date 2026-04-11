@@ -1,5 +1,6 @@
 export const PARAM = {
   ID: 'id',
+  POST_ID: 'postId',
 } as const;
 
 export const PATH = {
@@ -18,8 +19,10 @@ export const PATH = {
   },
   BLOGS: {
     PREFIX: 'blogs',
+    SA_PREFIX: 'sa/blogs',
     SINGLE: `:${PARAM.ID}`,
     POSTS: `:${PARAM.ID}/posts`,
+    POST: `:${PARAM.ID}/posts/:${PARAM.POST_ID}`,
   },
   COMMENTS: {
     PREFIX: 'comments',
@@ -49,7 +52,12 @@ export const PATH = {
 export const FULL_PATH = {
   BLOGS: `/${PATH.PREFIX}/${PATH.BLOGS.PREFIX}`,
   BLOG: `/${PATH.PREFIX}/${PATH.BLOGS.PREFIX}/${PATH.BLOGS.SINGLE}`,
-  BLOG_POST: `/${PATH.PREFIX}/${PATH.BLOGS.PREFIX}/${PATH.BLOGS.POSTS}`,
+  BLOG_POSTS: `/${PATH.PREFIX}/${PATH.BLOGS.PREFIX}/${PATH.BLOGS.POSTS}`,
+  //
+  SA_BLOGS: `/${PATH.PREFIX}/${PATH.BLOGS.SA_PREFIX}`,
+  SA_BLOG: `/${PATH.PREFIX}/${PATH.BLOGS.SA_PREFIX}/${PATH.BLOGS.SINGLE}`,
+  SA_BLOG_POSTS: `/${PATH.PREFIX}/${PATH.BLOGS.SA_PREFIX}/${PATH.BLOGS.POSTS}`,
+  SA_BLOG_POST: `/${PATH.PREFIX}/${PATH.BLOGS.SA_PREFIX}/${PATH.BLOGS.POST}`,
   //
   COMMENTS: `/${PATH.PREFIX}/${PATH.COMMENTS.PREFIX}`,
   COMMENT: `/${PATH.PREFIX}/${PATH.COMMENTS.PREFIX}/${PATH.COMMENTS.SINGLE}`,

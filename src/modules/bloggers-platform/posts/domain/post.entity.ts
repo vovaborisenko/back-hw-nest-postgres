@@ -4,6 +4,16 @@ import { CreatePostDomainDto } from './dto/create-post.domain.dto';
 import { UpdatePostDto } from '../dto/update-post.dto';
 import { Blog } from '../../blogs/domain/blog.entity';
 
+export class PostRaw {
+  id: number;
+  title: string;
+  excerpt: string;
+  content: string;
+  created_at: Date;
+  deleted_at: Date | null;
+  blog_id: number;
+}
+
 @Schema({ timestamps: true })
 export class Post {
   @Prop({ type: String, required: true })

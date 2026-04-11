@@ -19,14 +19,14 @@ export const postDto: {
     shortDescription: 'Обзор новых фич и улучшений в TypeScript',
     content:
       'TypeScript 5.0 представляет множество улучшений производительности и новые возможности...',
-    blogId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    blogId: 123,
   },
   update: {
     title: 'React 18: Что нового?',
     shortDescription: 'Знакомство с новыми возможностями React 18',
     content:
       'React 18 приносит революционные изменения в рендеринг приложений...',
-    blogId: 'b2c3d4e5-f6a7-890b-cdef-234567890123',
+    blogId: 456,
   },
 };
 
@@ -35,7 +35,7 @@ export async function createPost(
   dto: CreatePostInputDto = postDto.create,
 ): Promise<PostViewDto> {
   const { body: post } = await request(app)
-    .post(FULL_PATH.POSTS)
+    .post(FULL_PATH.SA_BLOG_POSTS.replace(':id', dto.blogId.toString()))
     .set('Authorization', validAuth)
     .send({ ...dto })
     .expect(HttpStatus.CREATED);
@@ -66,7 +66,7 @@ export async function createBlogAndHisPost(
   dtoPost: Omit<CreatePostInputDto, 'blogId'> = postDto.create,
 ): Promise<[BlogViewDto, PostViewDto]> {
   const blog = await createBlog(app, dtoBlog);
-  const post = await createPost(app, { ...dtoPost, blogId: blog.id });
+  const post = await createPost(app, { ...dtoPost, blogId: Number(blog.id) });
 
   return [blog, post];
 }
@@ -78,7 +78,10 @@ export async function createBlogAndHisPosts(
   dtoPost: Omit<CreatePostInputDto, 'blogId'> = postDto.create,
 ): Promise<[BlogViewDto, PostViewDto[]]> {
   const blog = await createBlog(app, dtoBlog);
-  const posts = await createPosts(count, app, { ...dtoPost, blogId: blog.id });
+  const posts = await createPosts(count, app, {
+    ...dtoPost,
+    blogId: Number(blog.id),
+  });
 
   return [blog, posts];
 }

@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { BlogsService } from './blogs/application/blogs.service';
 import { BlogsController } from './blogs/api/blogs.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from './blogs/domain/blog.entity';
@@ -7,7 +6,6 @@ import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 import { BlogsQueryRepository } from './blogs/infrastructure/blogs.query-repository';
 import { Post, PostSchema } from './posts/domain/post.entity';
 import { PostsController } from './posts/api/posts.controller';
-import { PostsService } from './posts/application/posts.service';
 import { PostsQueryRepository } from './posts/infrastructure/posts.query-repository';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
 import { CommentsRepository } from './comments/infrastructure/comments.repository';
@@ -19,6 +17,8 @@ import { Like, LikeSchema } from './likes/domain/like.entity';
 import { SetLikeUseCase } from './likes/application/usecases/set-like.usecase';
 import { LikesRepository } from './likes/infrastructure/likes.repository';
 import { PostsHandlers } from './posts/application';
+import { BlogHandlers } from './blogs/application';
+import { BlogsSaController } from './blogs/api/blogs-sa.controller';
 
 @Module({
   imports: [
@@ -30,7 +30,7 @@ import { PostsHandlers } from './posts/application';
     ]),
   ],
   providers: [
-    BlogsService,
+    ...BlogHandlers,
     BlogsRepository,
     BlogsQueryRepository,
     ...CommentsHandlers,
@@ -38,11 +38,15 @@ import { PostsHandlers } from './posts/application';
     CommentsQueryRepository,
     SetLikeUseCase,
     LikesRepository,
-    PostsService,
     PostsRepository,
     PostsQueryRepository,
     ...PostsHandlers,
   ],
-  controllers: [BlogsController, CommentsController, PostsController],
+  controllers: [
+    BlogsController,
+    BlogsSaController,
+    CommentsController,
+    PostsController,
+  ],
 })
 export class BloggersPlatformModule {}

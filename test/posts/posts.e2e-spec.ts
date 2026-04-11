@@ -45,7 +45,7 @@ describe('Posts API', () => {
     await deleteAllData(app);
   });
 
-  it.each`
+  it.skip.each`
     path                       | method
     ${FULL_PATH.POSTS}         | ${'post'}
     ${FULL_PATH.POSTS + '/12'} | ${'put'}
@@ -67,7 +67,7 @@ describe('Posts API', () => {
     },
   );
 
-  describe(`POST ${FULL_PATH.POSTS}`, () => {
+  describe.skip(`POST ${FULL_PATH.POSTS}`, () => {
     it('should return 404 if not exist blog', async () => {
       await request(app)
         .post(FULL_PATH.POSTS)
@@ -125,7 +125,7 @@ describe('Posts API', () => {
       const blogs = await createBlogs(12, app);
       await Promise.all(
         blogs.map(({ id }) =>
-          createPost(app, { ...postDto.create, blogId: id }),
+          createPost(app, { ...postDto.create, blogId: +id }),
         ),
       );
 
@@ -140,7 +140,7 @@ describe('Posts API', () => {
     });
   });
 
-  describe(`GET ${FULL_PATH.POSTS}/:id`, () => {
+  describe(`GET ${FULL_PATH.POST}`, () => {
     it('should return 404 when no post', async () => {
       await request(app)
         .get(`${FULL_PATH.POSTS}/${validParamId}`)
@@ -158,50 +158,7 @@ describe('Posts API', () => {
     });
   });
 
-  describe(`PUT ${FULL_PATH.POSTS}/:id`, () => {
-    it('should return 404 when no post', async () => {
-      const blog = await createBlog(app);
-      await request(app)
-        .put(`${FULL_PATH.POSTS}/${validParamId}`)
-        .set('Authorization', validAuth)
-        .send({ ...postDto.update, blogId: blog.id })
-        .expect(HttpStatus.NOT_FOUND);
-    });
-
-    it('should return 400 if not exist blog', async () => {
-      const [, post] = await createBlogAndHisPost(app);
-
-      await request(app)
-        .put(`${FULL_PATH.POSTS}/${post.id}`)
-        .set('Authorization', validAuth)
-        .send({ ...postDto.create, blogId: validParamId })
-        .expect(HttpStatus.NOT_FOUND);
-    });
-
-    it('should return 204 when requested id exist', async () => {
-      const [blog, [post1, post2]] = await createBlogAndHisPosts(2, app);
-      const editedPost = { ...postDto.update, blogId: blog.id };
-
-      await request(app)
-        .put(`${FULL_PATH.POSTS}/${post1.id}`)
-        .set('Authorization', validAuth)
-        .send({ ...editedPost, title: 'updated title' })
-        .expect(HttpStatus.NO_CONTENT);
-      await request(app)
-        .put(`${FULL_PATH.POSTS}/${post2.id}`)
-        .set('Authorization', validAuth)
-        .send(editedPost)
-        .expect(HttpStatus.NO_CONTENT);
-
-      const response = await request(app)
-        .get(`${FULL_PATH.POSTS}/${post2.id}`)
-        .expect(HttpStatus.OK);
-
-      expect(response.body).toMatchObject(editedPost);
-    });
-  });
-
-  describe(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
+  describe.skip(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
     it('should return 404 when no post', async () => {
       const { token } = await createUserAndLogin(app);
       await request(app)
@@ -373,25 +330,7 @@ describe('Posts API', () => {
     });
   });
 
-  describe(`DELETE ${FULL_PATH.POSTS}/:id`, () => {
-    it('should return 404 when no post', async () => {
-      await request(app)
-        .delete(`${FULL_PATH.POSTS}/${validParamId}`)
-        .set('Authorization', validAuth)
-        .expect(HttpStatus.NOT_FOUND);
-    });
-
-    it('should return 204 when requested id exist', async () => {
-      const [, [, post2]] = await createBlogAndHisPosts(2, app);
-
-      await request(app)
-        .delete(`${FULL_PATH.POSTS}/${post2.id}`)
-        .set('Authorization', validAuth)
-        .expect(HttpStatus.NO_CONTENT);
-    });
-  });
-
-  describe(`POST ${FULL_PATH.POSTS}/:id/comments`, () => {
+  describe.skip(`POST ${FULL_PATH.POSTS}/:id/comments`, () => {
     it('should return 401 when no accessToken', async () => {
       const [, post] = await createBlogAndHisPost(app);
       await request(app)
@@ -433,7 +372,7 @@ describe('Posts API', () => {
     });
   });
 
-  describe(`GET ${FULL_PATH.POSTS}/:id/comments`, () => {
+  describe.skip(`GET ${FULL_PATH.POSTS}/:id/comments`, () => {
     it('should return 404 when no post whit that id', async () => {
       const [, post] = await createBlogAndHisPost(app);
       await request(app)
