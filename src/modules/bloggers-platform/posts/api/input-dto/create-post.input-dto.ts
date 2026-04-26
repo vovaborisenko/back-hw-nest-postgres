@@ -1,4 +1,4 @@
-import { IsNumber } from 'class-validator';
+import { IsInt, IsPositive } from 'class-validator';
 import { CreatePostDto } from '../../dto/create-post.dto';
 import { IsStringLengthTrim } from '../../../../../core/decorators/validation/is-string-length-trim';
 import { Type } from 'class-transformer';
@@ -14,6 +14,7 @@ export class CreatePostInputDto implements CreatePostDto {
   content: string;
 
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
+  @IsPositive()
   blogId: number;
 }

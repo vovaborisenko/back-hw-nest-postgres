@@ -4,6 +4,16 @@ import { LikeStatus } from '../enums/like-status';
 import { User } from '../../../user-accounts/domain/user.entity';
 import { CreateLikeDomainDto } from './dto/create-like.domain-dto';
 import { UpdateLikeDomainDto } from './dto/update-like.domain-dto';
+import { LikeParent } from '../enums/like-parent';
+
+export interface LikeRaw {
+  id: number;
+  status: LikeStatus;
+  user_id: number;
+  parent_id: number;
+  parent_entity: LikeParent;
+  created_at: Date;
+}
 
 @Schema({ timestamps: true })
 export class Like {

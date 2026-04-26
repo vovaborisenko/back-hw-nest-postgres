@@ -1,17 +1,16 @@
-import { UpdateCommentDto } from '../../dto/update-comment.dto';
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Types } from 'mongoose';
+import { UpdateCommentDto } from '../../dto/update-comment.dto';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-code';
 
 export class UpdateCommentCommand extends Command<{
-  commentId: string | Types.ObjectId;
+  commentId: number;
 }> {
   constructor(
     public readonly dto: UpdateCommentDto,
-    public readonly commentId: string | Types.ObjectId,
-    public readonly userId: string | Types.ObjectId,
+    public readonly commentId: number,
+    public readonly userId: number,
   ) {
     super();
   }
@@ -25,20 +24,18 @@ export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentComman
     dto,
     commentId,
     userId,
-  }: UpdateCommentCommand): Promise<{ commentId: Types.ObjectId }> {
+  }: UpdateCommentCommand): Promise<{ commentId: number }> {
     const comment = await this.commentsRepository.findByIdOrNotFound(commentId);
 
-    if (comment.author.toString() !== userId.toString()) {
+    if (comment.user_id.toString() !== userId.toString()) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
         message: 'User is not comment owner',
       });
     }
 
-    comment.update(dto);
+    await this.commentsRepository.updateComment(commentId, dto);
 
-    await this.commentsRepository.save(comment);
-
-    return { commentId: comment._id };
+    return { commentId: comment.id };
   }
 }

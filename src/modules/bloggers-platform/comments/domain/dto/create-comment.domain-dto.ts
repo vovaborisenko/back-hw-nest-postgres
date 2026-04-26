@@ -1,5 +1,5 @@
 export interface CreateCommentDomainDto {
   content: string;
-  post: string;
-  author: string;
+  post_id: number;
+  user_id: number;
 }

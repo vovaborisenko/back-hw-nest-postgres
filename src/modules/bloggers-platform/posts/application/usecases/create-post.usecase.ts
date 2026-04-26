@@ -1,6 +1,7 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreatePostDto } from '../../dto/create-post.dto';
 import { PostsRepository } from '../../infrastructure/posts.repository';
+import { BlogsRepository } from '../../../blogs/infrastructure/blogs.repository';
 
 export class CreatePostCommand extends Command<number> {
   constructor(public readonly dto: CreatePostDto) {
@@ -10,9 +11,13 @@ export class CreatePostCommand extends Command<number> {
 
 @CommandHandler(CreatePostCommand)
 export class CreatePostUseCase implements ICommandHandler<CreatePostCommand> {
-  constructor(protected readonly repository: PostsRepository) {}
+  constructor(
+    protected readonly repository: PostsRepository,
+    protected readonly blogsRepository: BlogsRepository,
+  ) {}
 
-  execute({ dto }: CreatePostCommand): Promise<number> {
+  async execute({ dto }: CreatePostCommand): Promise<number> {
+    await this.blogsRepository.findByIdOrNotFound(dto.blogId);
     return this.repository.createPost(dto);
   }
 }

@@ -1,15 +1,14 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Types } from 'mongoose';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { DomainException } from '../../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../../core/exceptions/domain-exception-code';
 
 export class DeleteCommentCommand extends Command<{
-  commentId: string | Types.ObjectId;
+  commentId: number;
 }> {
   constructor(
-    public readonly commentId: string | Types.ObjectId,
-    public readonly userId: string | Types.ObjectId,
+    public readonly commentId: number,
+    public readonly userId: number,
   ) {
     super();
   }
@@ -22,20 +21,18 @@ export class DeleteCommentUseCase implements ICommandHandler<DeleteCommentComman
   async execute({
     commentId,
     userId,
-  }: DeleteCommentCommand): Promise<{ commentId: Types.ObjectId }> {
+  }: DeleteCommentCommand): Promise<{ commentId: number }> {
     const comment = await this.commentsRepository.findByIdOrNotFound(commentId);
 
-    if (comment.author.toString() !== userId.toString()) {
+    if (comment.user_id.toString() !== userId.toString()) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
         message: 'User is not comment owner',
       });
     }
 
-    comment.makeDeleted();
+    await this.commentsRepository.deleteComment(commentId);
 
-    await this.commentsRepository.save(comment);
-
-    return { commentId: comment._id };
+    return { commentId: comment.id };
   }
 }

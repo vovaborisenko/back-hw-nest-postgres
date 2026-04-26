@@ -6,7 +6,7 @@ import {
   createPost,
   postDto,
 } from '../utils/post/post.util';
-import { createBlog, createBlogs } from '../utils/blog/blog.util';
+import { createBlogs } from '../utils/blog/blog.util';
 import {
   createUserAndLogin,
   createUsersAndLogin,
@@ -45,7 +45,7 @@ describe('Posts API', () => {
     await deleteAllData(app);
   });
 
-  it.skip.each`
+  it.each`
     path                       | method
     ${FULL_PATH.POSTS}         | ${'post'}
     ${FULL_PATH.POSTS + '/12'} | ${'put'}
@@ -67,7 +67,7 @@ describe('Posts API', () => {
     },
   );
 
-  describe.skip(`POST ${FULL_PATH.POSTS}`, () => {
+  describe(`POST ${FULL_PATH.POSTS}`, () => {
     it('should return 404 if not exist blog', async () => {
       await request(app)
         .post(FULL_PATH.POSTS)
@@ -158,7 +158,7 @@ describe('Posts API', () => {
     });
   });
 
-  describe.skip(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
+  describe(`PUT ${FULL_PATH.POSTS}/:id/like-status`, () => {
     it('should return 404 when no post', async () => {
       const { token } = await createUserAndLogin(app);
       await request(app)
@@ -330,7 +330,7 @@ describe('Posts API', () => {
     });
   });
 
-  describe.skip(`POST ${FULL_PATH.POSTS}/:id/comments`, () => {
+  describe(`POST ${FULL_PATH.POSTS}/:id/comments`, () => {
     it('should return 401 when no accessToken', async () => {
       const [, post] = await createBlogAndHisPost(app);
       await request(app)
@@ -372,7 +372,7 @@ describe('Posts API', () => {
     });
   });
 
-  describe.skip(`GET ${FULL_PATH.POSTS}/:id/comments`, () => {
+  describe(`GET ${FULL_PATH.POSTS}/:id/comments`, () => {
     it('should return 404 when no post whit that id', async () => {
       const [, post] = await createBlogAndHisPost(app);
       await request(app)

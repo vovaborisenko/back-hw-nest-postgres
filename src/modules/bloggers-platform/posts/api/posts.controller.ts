@@ -119,8 +119,8 @@ export class PostsController {
     const { commentId } = await this.commandBus.execute(
       new CreateCommentCommand({
         content: dto.content,
-        post: params.id,
-        author: user.id,
+        postId: params.id,
+        userId: user.id,
       }),
     );
 
@@ -138,8 +138,8 @@ export class PostsController {
     await this.commandBus.execute(
       new SetPostLikeCommand({
         status: dto.likeStatus,
-        author: user.id,
-        parent: params.id,
+        userId: user.id,
+        parentId: params.id,
       }),
     );
   }

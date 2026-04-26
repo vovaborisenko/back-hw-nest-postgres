@@ -50,11 +50,10 @@ describe('Posts API body validation', () => {
       ${'content'}          | ${''}               | ${'content must be longer than or equal to 1 characters'}
       ${'content'}          | ${'    '}           | ${'content must be longer than or equal to 1 characters'}
       ${'content'}          | ${'4'.repeat(1001)} | ${'content must be shorter than or equal to 1000 characters'}
-      ${'blogId'}           | ${null}             | ${'blogId must be a mongodb id'}
-      ${'blogId'}           | ${5}                | ${'blogId must be a mongodb id'}
-      ${'blogId'}           | ${''}               | ${'blogId must be a mongodb id'}
-      ${'blogId'}           | ${'    '}           | ${'blogId must be a mongodb id'}
-      ${'blogId'}           | ${'dsfr'}           | ${'blogId must be a mongodb id'}
+      ${'blogId'}           | ${null}             | ${'blogId must be a positive number'}
+      ${'blogId'}           | ${''}               | ${'blogId must be a positive number'}
+      ${'blogId'}           | ${'    '}           | ${'blogId must be a positive number'}
+      ${'blogId'}           | ${'dsfr'}           | ${'blogId must be a positive number'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
@@ -89,10 +88,9 @@ describe('Posts API body validation', () => {
       ${'content'}          | ${''}               | ${'content must be longer than or equal to 1 characters'}
       ${'content'}          | ${'    '}           | ${'content must be longer than or equal to 1 characters'}
       ${'content'}          | ${'4'.repeat(1001)} | ${'content must be shorter than or equal to 1000 characters'}
-      ${'blogId'}           | ${5}                | ${'blogId must be a mongodb id'}
-      ${'blogId'}           | ${''}               | ${'blogId must be a mongodb id'}
-      ${'blogId'}           | ${'    '}           | ${'blogId must be a mongodb id'}
-      ${'blogId'}           | ${'dsfr'}           | ${'blogId must be a mongodb id'}
+      ${'blogId'}           | ${''}               | ${'blogId must be a positive number'}
+      ${'blogId'}           | ${'    '}           | ${'blogId must be a positive number'}
+      ${'blogId'}           | ${'dsfr'}           | ${'blogId must be a positive number'}
     `(
       'should throw 400: field = $field, value = $value, message = $message',
       async ({ field, value, message }) => {
