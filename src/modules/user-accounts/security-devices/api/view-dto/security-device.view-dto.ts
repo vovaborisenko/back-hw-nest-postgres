@@ -1,4 +1,4 @@
-import { SecurityDeviceRaw } from '../../domain/security-device.entity';
+import { SecurityDevice } from '../../domain/security-device.entity';
 
 export class SecurityDeviceViewDto {
   ip: string;
@@ -6,13 +6,13 @@ export class SecurityDeviceViewDto {
   lastActiveDate: string;
   deviceId: string;
 
-  static mapToView(device: SecurityDeviceRaw): SecurityDeviceViewDto {
+  static mapToView(device: SecurityDevice): SecurityDeviceViewDto {
     const dto = new SecurityDeviceViewDto();
 
     dto.ip = device.ip || '';
-    dto.deviceId = device.id;
-    dto.lastActiveDate = device.issued_at.toISOString();
-    dto.title = device.name;
+    dto.deviceId = device.deviceId;
+    dto.lastActiveDate = device.issuedAt.toISOString();
+    dto.title = device.deviceName;
 
     return dto;
   }

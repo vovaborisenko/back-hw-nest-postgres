@@ -20,7 +20,7 @@ export class DeleteSecurityDeviceUseCase implements ICommandHandler<DeleteSecuri
     const securityDevice =
       await this.securityDevicesRepository.findByIdOrNotFountFail(dto.deviceId);
 
-    if (securityDevice.user_id !== dto.userId) {
+    if (securityDevice.userId !== dto.userId) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
         message: 'Not your device',

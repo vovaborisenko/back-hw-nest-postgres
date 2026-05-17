@@ -29,7 +29,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
   }
 
   async validate(payload: RefreshTokenDto): Promise<RefreshTokenDto | null> {
-    const device = await this.securityDevicesRepository.findBy({
+    const device = await this.securityDevicesRepository.findOneBy({
       deviceId: payload.deviceId,
       userId: payload.id,
       issuedAt: parseJwtTime(payload.iat),

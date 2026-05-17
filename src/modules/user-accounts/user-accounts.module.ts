@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './domain/user.entity';
+import { User } from './domain/user.entity';
 import { UsersController } from './api/users.controller';
 import { BcryptService } from './application/bcrypt.service';
 import { UsersService } from './application/users.service';
@@ -20,18 +19,20 @@ import { securityDevicesHandlers } from './security-devices/application';
 import { SecurityDevicesController } from './security-devices/api/security-devices.controller';
 import { SecurityDevicesRepository } from './security-devices/repositories/security-devices.repository';
 import { SecurityDevicesQueryRepository } from './security-devices/repositories/security-devices.query-repository';
-import {
-  SecurityDevice,
-  SecurityDeviceSchema,
-} from './security-devices/domain/security-device.entity';
+import { SecurityDevice } from './security-devices/domain/security-device.entity';
 import { UserAccountsConfig } from './config/user-accounts.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { EmailConfirmation } from './domain/email-confirmation.entity';
+import { Recovery } from './domain/recovery.entity';
 
 @Module({
   imports: [
     JwtModule,
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      { name: SecurityDevice.name, schema: SecurityDeviceSchema },
+    TypeOrmModule.forFeature([
+      User,
+      EmailConfirmation,
+      Recovery,
+      SecurityDevice,
     ]),
     NotificationsModule,
   ],

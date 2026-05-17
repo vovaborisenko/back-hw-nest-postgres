@@ -1,73 +1,64 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model } from 'mongoose';
-import {
-  EmailConfirmation,
-  EmailConfirmationSchema,
-} from './email-confirmation.schema';
-import { Recovery, RecoverySchema } from './recovery.schema';
+import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
+import { EmailConfirmation } from './email-confirmation.entity';
+import { Recovery } from './recovery.entity';
 import { CreateUserDomainDto } from './dto/create-user.domain.dto';
+import { BaseDbEntity } from '../../../core/domain/baseDbEntity';
+import { SecurityDevice } from '../security-devices/domain/security-device.entity';
+import { DomainException } from '../../../core/exceptions/domain-exceptions';
+import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
 
-export interface UserRaw {
-  id: number;
-  email: string;
-  login: string;
-  password_hash: string;
-  created_at: Date;
-  delete_at: Date | null;
-}
-
-@Schema({ timestamps: true })
-export class User {
-  @Prop({ type: String, required: true, unique: true })
+@Entity()
+export class User extends BaseDbEntity {
+  @Column({ unique: true })
   login: string;
 
-  @Prop({ type: String, required: true, unique: true })
+  @Column({ unique: true })
   email: string;
 
-  @Prop({ type: String, required: true })
+  @Column()
   passwordHash: string;
 
-  createdAt: Date;
-
-  @Prop({ type: Date, nullable: true, default: null })
-  deletedAt: Date | null;
-
-  @Prop({ type: EmailConfirmationSchema })
+  @OneToOne(
+    () => EmailConfirmation,
+    (emailConfirmation) => emailConfirmation.user,
+    { cascade: true },
+  )
   emailConfirmation: EmailConfirmation;
 
-  @Prop({ type: RecoverySchema, nullable: true, default: null })
+  @OneToOne(() => Recovery, (recovery) => recovery.user, { cascade: true })
   recovery: Recovery | null;
 
-  static createInstance(dto: CreateUserDomainDto): UserDocument {
+  @OneToMany(() => SecurityDevice, (sd) => sd.user, {
+    orphanedRowAction: 'soft-delete',
+  })
+  securityDevices: SecurityDevice[];
+
+  static create(dto: CreateUserDomainDto): User {
     const user = new this();
 
     user.login = dto.login;
     user.email = dto.email;
     user.passwordHash = dto.passwordHash;
-    user.emailConfirmation = {
-      expirationDate: new Date(Date.now() + 3.6e6),
-      confirmationCode: crypto.randomUUID(),
-      isConfirmed: false,
-    };
+    user.emailConfirmation = EmailConfirmation.create();
 
-    return user as UserDocument;
-  }
-
-  makeDeleted() {
-    if (this.deletedAt !== null) {
-      throw new Error('Entity already deleted');
-    }
-
-    this.deletedAt = new Date();
+    return user;
   }
 
   confirm() {
     if (this.emailConfirmation.isConfirmed) {
-      throw new Error('Entity already confirmed');
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Entity already confirmed',
+        extensions: [{ field: 'code', message: 'already confirmed' }],
+      });
     }
 
     if (this.emailConfirmation.expirationDate.valueOf() < Date.now()) {
-      throw new Error('Entity confirmation expired');
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Entity confirmation expired',
+        extensions: [{ field: 'code', message: 'expired' }],
+      });
     }
 
     this.emailConfirmation.isConfirmed = true;
@@ -75,24 +66,18 @@ export class User {
 
   updateEmailConfirmation() {
     if (this.emailConfirmation.isConfirmed) {
-      throw new Error('Entity already confirmed');
+      throw new DomainException({
+        code: DomainExceptionCode.BadRequest,
+        message: 'Entity already confirmed',
+        extensions: [{ field: 'email', message: 'already confirmed' }],
+      });
     }
 
     this.emailConfirmation.expirationDate = new Date(Date.now() + 3.6e6);
     this.emailConfirmation.confirmationCode = crypto.randomUUID();
   }
 
-  createRecovery() {
-    this.recovery = {
-      expirationDate: new Date(Date.now() + 3.6e6),
-      code: crypto.randomUUID(),
-    };
+  createRecoveryCode() {
+    this.recovery = Recovery.create();
   }
 }
-
-export const UserSchema = SchemaFactory.createForClass(User);
-
-UserSchema.loadClass(User);
-
-export type UserDocument = HydratedDocument<User>;
-export type UserModelType = Model<UserDocument> & typeof User;

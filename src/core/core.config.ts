@@ -36,7 +36,7 @@ export class CoreConfig {
       'Ser correct NODE_ENV value, available values: ' +
       configValidationUtility.getEnumValues(Environments).join(', '),
   })
-  env: string;
+  env: Environments;
 
   @IsBoolean({
     message:
@@ -86,5 +86,9 @@ export class CoreConfig {
 
     // Валидация после инициализации всех свойств
     configValidationUtility.validateConfig(this);
+  }
+
+  get isDev(): boolean {
+    return this.env === Environments.DEVELOPMENT;
   }
 }

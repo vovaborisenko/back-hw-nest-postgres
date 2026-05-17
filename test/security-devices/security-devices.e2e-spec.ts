@@ -143,6 +143,10 @@ describe('Security Devices API', () => {
         .delete(`${FULL_PATH.DEVICES}/${crypto.randomUUID()}`)
         .set('Cookie', `refreshToken=${refreshToken}`)
         .expect(HttpStatus.NOT_FOUND);
+      await request(app)
+        .delete(`${FULL_PATH.DEVICES}/1234`)
+        .set('Cookie', `refreshToken=${refreshToken}`)
+        .expect(HttpStatus.NOT_FOUND);
     });
 
     it('should return 403 if try to delete the deviceId of other user', async () => {

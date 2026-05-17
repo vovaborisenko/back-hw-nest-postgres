@@ -1,65 +1,44 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model, Types } from 'mongoose';
 import { User } from '../../domain/user.entity';
 import { CreateSecurityDeviceDomainDto } from './dto/create-secirity-device.domain-dto';
 import { UpdateSecurityDeviceDomainDto } from './dto/update-secirity-device.domain-dto';
 import { parseJwtTime } from '../../../../core/utils/parse-jwt-time';
+import { Column, Entity, ManyToOne } from 'typeorm';
+import { BaseDbEntity } from '../../../../core/domain/baseDbEntity';
 
-export interface SecurityDeviceRaw {
-  id: string;
-  name: string;
-  ip: string | null;
-  user_id: number;
-  expired_at: Date;
-  issued_at: Date;
-  created_at: Date;
-  deleted_at: Date | null;
-}
-
-@Schema({ timestamps: true })
-export class SecurityDevice {
-  @Prop({ type: String, required: true, unique: true })
-  deviceId: string;
-
-  @Prop({ type: String, required: true })
+@Entity()
+export class SecurityDevice extends BaseDbEntity {
+  @Column()
   deviceName: string;
 
-  @Prop({ type: Date, default: Date.now })
+  @Column({ type: 'uuid', default: crypto.randomUUID() })
+  deviceId: string;
+
+  @Column({ type: 'timestamptz' })
   expiredAt: Date;
 
-  @Prop({ type: String, required: true, nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   ip: string | null;
 
-  @Prop({ type: Date, required: true })
+  @Column({ type: 'timestamptz' })
   issuedAt: Date;
 
-  @Prop({ type: Types.ObjectId, required: true, ref: User.name })
-  userId: Types.ObjectId;
+  @ManyToOne(() => User, (user) => user.securityDevices, { nullable: false })
+  user: User;
 
-  createdAt: Date;
+  @Column({ nullable: false })
+  userId: number;
 
-  @Prop({ type: Date, nullable: true, default: null })
-  deletedAt: Date | null;
-
-  static createInstance(dto: CreateSecurityDeviceDomainDto) {
+  static create(dto: CreateSecurityDeviceDomainDto) {
     const device = new this();
 
-    // device.userId = new Types.ObjectId(dto.userId);
+    device.userId = dto.userId;
     device.deviceId = dto.deviceId;
     device.deviceName = dto.deviceName;
     device.expiredAt = parseJwtTime(dto.exp);
     device.ip = dto.ip;
     device.issuedAt = parseJwtTime(dto.iat);
 
-    return device as SecurityDeviceDocument;
-  }
-
-  makeDeleted() {
-    if (this.deletedAt !== null) {
-      throw new Error('Entity already deleted');
-    }
-
-    this.deletedAt = new Date();
+    return device;
   }
 
   update(dto: UpdateSecurityDeviceDomainDto) {
@@ -67,12 +46,3 @@ export class SecurityDevice {
     this.issuedAt = parseJwtTime(dto.iat);
   }
 }
-
-export const SecurityDeviceSchema =
-  SchemaFactory.createForClass(SecurityDevice);
-
-SecurityDeviceSchema.loadClass(SecurityDevice);
-
-export type SecurityDeviceDocument = HydratedDocument<SecurityDevice>;
-export type SecurityDeviceModelType = Model<SecurityDeviceDocument> &
-  typeof SecurityDevice;

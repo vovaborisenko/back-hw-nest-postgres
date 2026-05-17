@@ -5,6 +5,7 @@ import { Inject } from '@nestjs/common';
 import { INJECT_TOKEN } from '../../../constants/inject-token';
 import { JwtService } from '@nestjs/jwt';
 import { RefreshTokenDto } from '../../../guards/dto/user-context.dto';
+import { SecurityDevice } from '../../domain/security-device.entity';
 
 export class CreateSecurityDeviceCommand extends Command<void> {
   constructor(public readonly dto: CreateSecurityDeviceDto) {
@@ -23,8 +24,7 @@ export class CreateSecurityDeviceUseCase implements ICommandHandler<CreateSecuri
   async execute({ dto }: CreateSecurityDeviceCommand): Promise<void> {
     const { id, deviceId, exp, iat } =
       this.refreshTokenContext.decode<RefreshTokenDto>(dto.refreshToken);
-
-    await this.securityDevicesRepository.create({
+    const securityDevice = SecurityDevice.create({
       ip: dto.ip,
       userId: id,
       deviceId,
@@ -32,5 +32,7 @@ export class CreateSecurityDeviceUseCase implements ICommandHandler<CreateSecuri
       exp,
       iat,
     });
+
+    await this.securityDevicesRepository.save(securityDevice);
   }
 }

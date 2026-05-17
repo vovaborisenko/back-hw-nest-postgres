@@ -52,7 +52,7 @@ export class AuthService {
 
     const isPasswordCorrect = await this.bcryptService.compare(
       password,
-      user.password_hash,
+      user.passwordHash,
     );
 
     if (!isPasswordCorrect) {

@@ -23,7 +23,11 @@ export class UpdateSecurityDeviceUseCase implements ICommandHandler<UpdateSecuri
   async execute({ dto }: UpdateSecurityDeviceCommand): Promise<void> {
     const { deviceId, exp, iat } =
       this.refreshTokenContext.decode<RefreshTokenDto>(dto.refreshToken);
+    const securityDevice =
+      await this.securityDevicesRepository.findByIdOrNotFountFail(deviceId);
 
-    await this.securityDevicesRepository.updateById(deviceId, { exp, iat });
+    securityDevice.update({ exp, iat });
+
+    await this.securityDevicesRepository.save(securityDevice);
   }
 }

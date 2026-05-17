@@ -34,8 +34,8 @@ export class Comment {
     const comment = new this();
 
     comment.content = dto.content;
-    comment.post = new Types.ObjectId(dto.post);
-    comment.author = new Types.ObjectId(dto.author);
+    // comment.post = new Types.ObjectId(dto.post);
+    // comment.author = new Types.ObjectId(dto.author);
 
     return comment as CommentDocument;
   }
