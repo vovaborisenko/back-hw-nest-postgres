@@ -1,27 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import { UserRaw } from '../domain/user.entity';
+import { User } from '../domain/user.entity';
 import { UserViewDto } from '../api/view-dto/users.view-dto';
 import { GetUsersQueryParamsInputDto } from '../api/input-dto/get-users.query-params.input-dto';
 import { BasePaginatedViewDto } from '../../../core/api/view-dto/base.paginated.view-dto';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
 import { MeViewDto } from '../api/view-dto/me.view-dto';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { FindOptionsOrder, FindOptionsWhere, ILike, Repository } from 'typeorm';
 
 @Injectable()
 export class UsersQueryRepository {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(User) private readonly userRepo: Repository<User>,
+  ) {}
 
-  async findById(id: number): Promise<UserRaw | null> {
-    const [user = null] = await this.dataSource.query<UserRaw[]>(
-      `SELECT * 
-      FROM users 
-      WHERE id = $1 AND deleted_at is null`,
-      [id],
-    );
-
-    return user;
+  findById(id: number): Promise<User | null> {
+    return this.userRepo.findOneBy({ id });
   }
 
   async getMeOrFail(id: number): Promise<MeViewDto> {
@@ -53,43 +48,30 @@ export class UsersQueryRepository {
   async getAll(
     query: GetUsersQueryParamsInputDto,
   ): Promise<BasePaginatedViewDto<UserViewDto[]>> {
-    const loginFilter = query.searchLoginTerm
-      ? `login ILIKE '%' || '${query.searchLoginTerm}' || '%'`
-      : '';
-    const emailFilter = query.searchEmailTerm
-      ? `email ILIKE '%' || '${query.searchEmailTerm}' || '%'`
-      : '';
-    const orFilter = [loginFilter, emailFilter].filter(Boolean).join(' OR ');
-    const orFilterInBrackets = orFilter ? `( ${orFilter} )` : '';
-    const andFilter = [orFilterInBrackets, 'deleted_at is NULL']
-      .filter(Boolean)
-      .join(' AND ');
-    const sortField = query.sortBy.replace(/([A-Z])/g, '_$1');
-    const sortByQuery = query.sortBy
-      ? `${sortField} ${query.sortDirection}`
-      : '';
-    const sortByDefault = `id ${query.sortDirection}`;
-    const orderBy = [sortByQuery, sortByDefault].filter(Boolean).join(', ');
+    const where: FindOptionsWhere<User>[] = [];
+    const order: FindOptionsOrder<User> = {};
 
-    const dataQuery = this.dataSource.query<UserRaw[]>(
-      `
-      SELECT * 
-      FROM users 
-      WHERE ${andFilter} 
-      ORDER BY ${orderBy} 
-      LIMIT $1 
-      OFFSET $2    `,
-      [query.pageSize, query.skip],
-    );
-    const countQuery = this.dataSource.query<[{ count: string }]>(
-      `
-      SELECT COUNT(*) 
-      FROM users 
-      WHERE ${andFilter}
-    `,
-    );
+    if (query.searchLoginTerm) {
+      where.push({ login: ILike(`%${query.searchLoginTerm}%`) });
+    }
 
-    const [items, [{ count }]] = await Promise.all([dataQuery, countQuery]);
+    if (query.searchEmailTerm) {
+      where.push({ email: ILike(`%${query.searchEmailTerm}%`) });
+    }
+
+    if (query.sortBy) {
+      order[query.sortBy] = query.sortDirection;
+    }
+
+    const [items, count] = await this.userRepo.findAndCount({
+      where,
+      skip: query.skip,
+      take: query.pageSize,
+      order: {
+        ...order,
+        id: query.sortDirection,
+      },
+    });
 
     return BasePaginatedViewDto.mapToView({
       page: query.pageNumber,

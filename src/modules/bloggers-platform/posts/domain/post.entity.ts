@@ -48,7 +48,7 @@ export class Post {
     this.title = dto.title || this.title;
     this.content = dto.content || this.content;
     this.shortDescription = dto.shortDescription || this.shortDescription;
-    this.blog = dto.blogId ? new Types.ObjectId(dto.blogId) : this.blog;
+    // this.blog = dto.blogId ? new Types.ObjectId(dto.blogId) : this.blog;
   }
 
   makeDeleted(): void {

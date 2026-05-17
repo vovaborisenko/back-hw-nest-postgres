@@ -1,11 +1,10 @@
 import { configModule } from './config-dynamic.module';
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserAccountsModule } from './modules/user-accounts/user-accounts.module';
-import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
+// import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exseptions.filter';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
@@ -20,21 +19,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     CoreModule,
     TypeOrmModule.forRootAsync({
       inject: [CoreConfig],
-      useFactory: (coreConfig: CoreConfig) => ({
-        type: 'postgres',
-        url: coreConfig.postgresURI,
-      }),
-    }),
-    MongooseModule.forRootAsync({
       useFactory: (coreConfig: CoreConfig) => {
-        const uri = coreConfig.mongoURI;
-        console.log('DB_URI', uri);
+        const url = coreConfig.postgresURI;
+        console.log('DB_URI', url);
 
         return {
-          uri,
+          type: 'postgres',
+          url,
+          autoLoadEntities: true,
+          synchronize: true,
+          logging: true,
         };
       },
-      inject: [CoreConfig],
     }),
     ThrottlerModule.forRootAsync({
       useFactory: (coreConfig: CoreConfig) => {
@@ -53,7 +49,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       inject: [CoreConfig],
     }),
     UserAccountsModule,
-    BloggersPlatformModule,
+    // BloggersPlatformModule,
   ],
   controllers: [AppController],
   providers: [

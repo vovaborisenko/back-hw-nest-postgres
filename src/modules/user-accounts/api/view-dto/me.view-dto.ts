@@ -1,11 +1,11 @@
-import { UserRaw } from '../../domain/user.entity';
+import { User } from '../../domain/user.entity';
 
 export class MeViewDto {
   email: string;
   login: string;
   userId: string;
 
-  static mapToView(user: UserRaw): MeViewDto {
+  static mapToView(user: User): MeViewDto {
     const dto = new MeViewDto();
 
     dto.userId = user.id.toString();
