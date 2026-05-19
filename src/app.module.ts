@@ -4,7 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserAccountsModule } from './modules/user-accounts/user-accounts.module';
-// import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
+import { BloggersPlatformModule } from './modules/bloggers-platform/bloggers-platform.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AllHttpExceptionsFilter } from './core/exceptions/filters/all-exseptions.filter';
 import { DomainHttpExceptionsFilter } from './core/exceptions/filters/domain-exceptions.filter';
@@ -49,7 +49,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       inject: [CoreConfig],
     }),
     UserAccountsModule,
-    // BloggersPlatformModule,
+    BloggersPlatformModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,72 +1,51 @@
 import { Injectable } from '@nestjs/common';
-import { BlogRaw } from '../domain/blog.entity';
+import { Blog } from '../domain/blog.entity';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-code';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { CreateBlogDomainDto } from '../domain/dto/create-blog.domain.dto';
 import { UpdateBlogDto } from '../dto/update-blog.dto';
 
 @Injectable()
 export class BlogsRepository {
   constructor(
-    @InjectDataSource()
-    private readonly dataSource: DataSource,
+    @InjectRepository(Blog)
+    private readonly blogRepo: Repository<Blog>,
   ) {}
 
-  async createBlog(blog: CreateBlogDomainDto): Promise<number> {
-    const [{ id }] = await this.dataSource.query<[{ id: number }]>(
-      `
-    INSERT INTO blogs (name, description, website_url)
-    VALUES ($1, $2, $3)
-    RETURNING id
-    `,
-      [blog.name, blog.description, blog.websiteUrl],
-    );
+  async createBlog(dto: CreateBlogDomainDto): Promise<number> {
+    const blog = Blog.create(dto);
 
-    return id;
+    await this.blogRepo.save(blog);
+
+    return blog.id;
   }
 
-  async updateBlog(id: number, blog: UpdateBlogDto): Promise<boolean> {
-    const [, updatedCount] = await this.dataSource.query<[void, number]>(
-      `
-    UPDATE blogs
-    SET name = $2, description = $3, website_url = $4
-    WHERE id = $1 and deleted_at is NULL
-    `,
-      [id, blog.name, blog.description, blog.websiteUrl],
-    );
+  async updateBlogOrNotFound(id: number, dto: UpdateBlogDto): Promise<void> {
+    const blog = await this.findByIdOrNotFound(id);
 
-    return updatedCount > 0;
+    blog.name = dto.name;
+    blog.description = dto.description;
+    blog.websiteUrl = dto.websiteUrl;
+
+    await this.blogRepo.save(blog);
   }
 
   async deleteBlog(id: number): Promise<boolean> {
-    const [, deletedCount] = await this.dataSource.query<[void, number]>(
-      `
-    UPDATE blogs
-    SET deleted_at = $2
-    WHERE id = $1 and deleted_at is NULL
-    `,
-      [id, new Date()],
-    );
+    const { affected = 0 } = await this.blogRepo.softDelete({
+      id,
+      deletedAt: IsNull(),
+    });
 
-    return deletedCount > 0;
+    return affected > 0;
   }
 
-  async findById(id: number): Promise<BlogRaw | null> {
-    const [blog = null] = await this.dataSource.query<BlogRaw[]>(
-      `
-        SELECT * 
-        FROM blogs 
-        WHERE id = $1 AND deleted_at is NULL
-      `,
-      [id],
-    );
-
-    return blog;
+  findById(id: number): Promise<Blog | null> {
+    return this.blogRepo.findOneBy({ id });
   }
 
-  async findByIdOrNotFound(id: number): Promise<BlogRaw> {
+  async findByIdOrNotFound(id: number): Promise<Blog> {
     const blog = await this.findById(id);
 
     if (!blog) {

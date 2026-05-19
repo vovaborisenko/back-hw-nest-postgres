@@ -1,68 +1,30 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model, Types } from 'mongoose';
 import { CreatePostDomainDto } from './dto/create-post.domain.dto';
-import { UpdatePostDto } from '../dto/update-post.dto';
 import { Blog } from '../../blogs/domain/blog.entity';
+import { Column, Entity, ManyToOne } from 'typeorm';
+import { BaseDbEntity } from '../../../../core/domain/baseDbEntity';
 
-export class PostRaw {
-  id: number;
-  title: string;
-  excerpt: string;
-  content: string;
-  created_at: Date;
-  deleted_at: Date | null;
-  blog_id: number;
-}
-
-@Schema({ timestamps: true })
-export class Post {
-  @Prop({ type: String, required: true })
+@Entity()
+export class Post extends BaseDbEntity {
+  @Column()
   title: string;
 
-  @Prop({ type: String, required: true })
+  @Column()
   shortDescription: string;
 
-  @Prop({ type: String, required: true })
+  @Column()
   content: string;
 
-  @Prop({ type: Types.ObjectId, ref: Blog.name, required: true })
-  blog: Types.ObjectId;
+  @ManyToOne(() => Blog, (blog) => blog.posts)
+  blog: Blog;
 
-  createdAt: Date;
-
-  @Prop({ type: Date, nullable: true, default: null })
-  deletedAt: Date | null;
-
-  static createInstance(dto: CreatePostDomainDto) {
+  static create(dto: CreatePostDomainDto): Post {
     const post = new this();
 
     post.title = dto.title;
     post.content = dto.content;
     post.shortDescription = dto.shortDescription;
-    post.blog = new Types.ObjectId(dto.blogId);
+    post.blog = dto.blog;
 
-    return post as PostDocument;
-  }
-
-  update(dto: UpdatePostDto): void {
-    this.title = dto.title || this.title;
-    this.content = dto.content || this.content;
-    this.shortDescription = dto.shortDescription || this.shortDescription;
-    // this.blog = dto.blogId ? new Types.ObjectId(dto.blogId) : this.blog;
-  }
-
-  makeDeleted(): void {
-    if (this.deletedAt !== null) {
-      throw new Error('Entity already deleted');
-    }
-
-    this.deletedAt = new Date();
+    return post;
   }
 }
-
-export const PostSchema = SchemaFactory.createForClass(Post);
-
-PostSchema.loadClass(Post);
-
-export type PostDocument = HydratedDocument<Post>;
-export type PostModelType = Model<PostDocument> & typeof Post;

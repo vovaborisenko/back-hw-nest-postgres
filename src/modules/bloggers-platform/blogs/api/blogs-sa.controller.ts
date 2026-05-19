@@ -69,8 +69,6 @@ export class BlogsSaController extends BlogsBaseController {
     @Param() params: BasePathParamsInputDto,
     @Body() dto: CreateBlogPostInputDto,
   ): Promise<PostViewDto> {
-    await this.blogsQueryRepository.getByIdOrNotFoundFail(params.id);
-
     const id = await this.commandBus.execute(
       new CreatePostCommand({ ...dto, blogId: params.id }),
     );
@@ -86,9 +84,7 @@ export class BlogsSaController extends BlogsBaseController {
   ): Promise<void> {
     await this.blogsQueryRepository.getByIdOrNotFoundFail(params.id);
 
-    await this.commandBus.execute(
-      new UpdatePostCommand(params.postId, { ...dto, blogId: params.id }),
-    );
+    await this.commandBus.execute(new UpdatePostCommand(params.postId, dto));
   }
 
   @Delete(POST)
