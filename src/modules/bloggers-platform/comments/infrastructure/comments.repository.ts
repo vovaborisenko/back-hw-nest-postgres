@@ -1,67 +1,52 @@
 import { Injectable } from '@nestjs/common';
-import { CommentRaw } from '../domain/comment.entity';
+import { Comment } from '../domain/comment.entity';
 import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-code';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { UpdateCommentDto } from '../dto/update-comment.dto';
 
 @Injectable()
 export class CommentsRepository {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(Comment)
+    private readonly commentsRepo: Repository<Comment>,
+  ) {}
 
-  async createComment(comment: CreateCommentDto): Promise<number> {
-    const [{ id }] = await this.dataSource.query<[{ id: number }]>(
-      `
-    INSERT INTO comments (content, post_id, user_id)
-    VALUES ($1, $2, $3)
-    RETURNING id
-    `,
-      [comment.content, comment.postId, comment.userId],
-    );
+  async createComment(dto: CreateCommentDto): Promise<number> {
+    const comment = Comment.create(dto);
 
-    return id;
+    await this.commentsRepo.save(comment);
+
+    return comment.id;
   }
 
-  async updateComment(id: number, comment: UpdateCommentDto): Promise<boolean> {
-    const [, updatedCount] = await this.dataSource.query<[void, number]>(
-      `
-    UPDATE comments
-    SET content = $2
-    WHERE id = $1 and deleted_at is NULL
-    `,
-      [id, comment.content],
-    );
+  async updateComment(id: number, dto: UpdateCommentDto): Promise<void> {
+    const comment = await this.findByIdOrNotFound(id);
 
-    return updatedCount > 0;
+    comment.content = dto.content;
+
+    await this.commentsRepo.save(comment);
   }
 
   async deleteComment(id: number): Promise<boolean> {
-    const [, deletedCount] = await this.dataSource.query<[void, number]>(
-      `
-    UPDATE comments
-    SET deleted_at = $2
-    WHERE id = $1 and deleted_at is NULL
-    `,
-      [id, new Date()],
-    );
+    const { affected = 0 } = await this.commentsRepo.softDelete({
+      id,
+      deletedAt: IsNull(),
+    });
 
-    return deletedCount > 0;
+    return affected > 0;
   }
 
-  async findById(id: number): Promise<CommentRaw | null> {
-    const [comment = null] = await this.dataSource.query<CommentRaw[]>(
-      `SELECT * 
-      FROM comments 
-      WHERE id = $1 AND deleted_at is null`,
-      [id],
-    );
-
-    return comment;
+  findById(id: number): Promise<Comment | null> {
+    return this.commentsRepo.findOne({
+      where: { id },
+      relations: { author: true },
+    });
   }
 
-  async findByIdOrNotFound(id: number): Promise<CommentRaw> {
+  async findByIdOrNotFound(id: number): Promise<Comment> {
     const comment = await this.findById(id);
 
     if (!comment) {

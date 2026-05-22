@@ -1,7 +1,9 @@
 import { LikeStatus } from '../../enums/like-status';
+import { LikeParent } from '../../enums/like-parent';
 
 export class CreateLikeDomainDto {
   status: LikeStatus;
-  author: string;
-  parent: string;
+  userId: number;
+  parentId: number;
+  parentType: LikeParent;
 }

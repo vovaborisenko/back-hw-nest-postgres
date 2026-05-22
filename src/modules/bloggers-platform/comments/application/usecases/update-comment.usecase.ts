@@ -27,7 +27,7 @@ export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentComman
   }: UpdateCommentCommand): Promise<{ commentId: number }> {
     const comment = await this.commentsRepository.findByIdOrNotFound(commentId);
 
-    if (comment.user_id.toString() !== userId.toString()) {
+    if (comment.author.id.toString() !== userId.toString()) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,
         message: 'User is not comment owner',

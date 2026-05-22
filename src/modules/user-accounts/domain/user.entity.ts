@@ -6,6 +6,7 @@ import { BaseDbEntity } from '../../../core/domain/baseDbEntity';
 import { SecurityDevice } from '../security-devices/domain/security-device.entity';
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
+import { Comment } from '../../bloggers-platform/comments/domain/comment.entity';
 
 @Entity()
 export class User extends BaseDbEntity {
@@ -32,6 +33,11 @@ export class User extends BaseDbEntity {
     orphanedRowAction: 'soft-delete',
   })
   securityDevices: SecurityDevice[];
+
+  @OneToMany(() => Comment, (comment) => comment.author, {
+    orphanedRowAction: 'soft-delete',
+  })
+  comments: Comment[];
 
   static create(dto: CreateUserDomainDto): User {
     const user = new this();

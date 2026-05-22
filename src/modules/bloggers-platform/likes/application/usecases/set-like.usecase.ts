@@ -1,6 +1,7 @@
 import { Command, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SetLikeDto } from '../../dto/set-like.dto';
 import { LikesRepository } from '../../infrastructure/likes.repository';
+import { Like } from '../../domain/like.entity';
 
 export class SetLikeCommand extends Command<void> {
   constructor(public readonly dto: SetLikeDto) {
@@ -13,14 +14,11 @@ export class SetLikeUseCase implements ICommandHandler<SetLikeCommand> {
   constructor(private readonly likesRepository: LikesRepository) {}
 
   async execute({ dto }: SetLikeCommand): Promise<void> {
-    const like = await this.likesRepository.findUserLike(dto);
+    const like =
+      (await this.likesRepository.findUserLike(dto)) || Like.create(dto);
 
-    if (like) {
-      await this.likesRepository.updateLike(like.id, dto.status);
+    like.status = dto.status;
 
-      return;
-    }
-
-    await this.likesRepository.createLike(dto);
+    await this.likesRepository.save(like);
   }
 }
