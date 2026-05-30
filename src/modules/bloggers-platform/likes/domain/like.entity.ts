@@ -1,51 +1,35 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Model, Types } from 'mongoose';
 import { LikeStatus } from '../enums/like-status';
 import { User } from '../../../user-accounts/domain/user.entity';
 import { CreateLikeDomainDto } from './dto/create-like.domain-dto';
-import { UpdateLikeDomainDto } from './dto/update-like.domain-dto';
 import { LikeParent } from '../enums/like-parent';
+import { Column, Entity, ManyToOne } from 'typeorm';
+import { BaseDbEntity } from '../../../../core/domain/baseDbEntity';
 
-export interface LikeRaw {
-  id: number;
-  status: LikeStatus;
-  user_id: number;
-  parent_id: number;
-  parent_entity: LikeParent;
-  created_at: Date;
-}
-
-@Schema({ timestamps: true })
-export class Like {
-  @Prop({ type: String, enum: LikeStatus, required: true })
+@Entity()
+export class Like extends BaseDbEntity {
+  @Column({ type: 'enum', enum: LikeStatus })
   status: LikeStatus;
 
-  @Prop({ type: Types.ObjectId, ref: User.name, required: true })
-  author: Types.ObjectId;
+  @ManyToOne(() => User)
+  author: User;
 
-  @Prop({ type: Types.ObjectId, required: true })
-  parent: Types.ObjectId;
+  @Column()
+  authorId: number;
 
-  createdAt: Date;
+  @Column()
+  parentId: number;
 
-  static createInstance(dto: CreateLikeDomainDto) {
+  @Column({ type: 'enum', enum: LikeParent })
+  parentType: LikeParent;
+
+  static create(dto: CreateLikeDomainDto) {
     const like = new this();
 
     like.status = dto.status;
-    like.author = new Types.ObjectId(dto.author);
-    like.parent = new Types.ObjectId(dto.parent);
+    like.author = { id: dto.userId } as User;
+    like.parentId = dto.parentId;
+    like.parentType = dto.parentType;
 
-    return like as LikeDocument;
-  }
-
-  update(dto: UpdateLikeDomainDto) {
-    this.status = dto.status;
+    return like;
   }
 }
-
-export const LikeSchema = SchemaFactory.createForClass(Like);
-
-LikeSchema.loadClass(Like);
-
-export type LikeDocument = HydratedDocument<Like>;
-export type LikeModelType = Model<LikeDocument> & typeof Like;

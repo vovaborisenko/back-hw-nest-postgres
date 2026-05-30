@@ -10,7 +10,7 @@ import { CommentsRepository } from '../../infrastructure/comments.repository';
 import { LikeParent } from '../../../likes/enums/like-parent';
 
 export class SetCommentLikeCommand extends Command<void> {
-  constructor(public readonly dto: Omit<SetLikeDto, 'parentEntity'>) {
+  constructor(public readonly dto: Omit<SetLikeDto, 'parentType'>) {
     super();
   }
 }
@@ -25,7 +25,7 @@ export class SetCommentLikeUseCase implements ICommandHandler<SetCommentLikeComm
   async execute({ dto }: SetCommentLikeCommand): Promise<void> {
     await this.commentsRepository.findByIdOrNotFound(dto.parentId);
     await this.commandBus.execute(
-      new SetLikeCommand({ ...dto, parentEntity: LikeParent.Comments }),
+      new SetLikeCommand({ ...dto, parentType: LikeParent.Comments }),
     );
   }
 }

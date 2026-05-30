@@ -1,6 +1,6 @@
-import { NewestLikeRaw } from '../../infrastructure/dto/post.aggregated-dto';
 import { LikeStatus } from '../../../likes/enums/like-status';
 import { Post } from '../../domain/post.entity';
+import { Like } from '../../../likes/domain/like.entity';
 
 interface NewestLike {
   addedAt: string;
@@ -23,7 +23,13 @@ export class PostViewDto {
     newestLikes: NewestLike[];
   };
 
-  static mapToView(post: Post) {
+  static mapToView(
+    post: Post,
+    newestLikes: Like[],
+    myStatus: LikeStatus,
+    likesCount: number,
+    dislikesCount: number,
+  ): PostViewDto {
     const dto = new PostViewDto();
 
     dto.id = post.id.toString();
@@ -34,25 +40,22 @@ export class PostViewDto {
     dto.blogName = post.blog.name;
     dto.createdAt = post.createdAt.toISOString();
     dto.extendedLikesInfo = {
-      dislikesCount: 0,
-      // dislikesCount: post.dislikes_count || 0,
-      likesCount: 0,
-      // likesCount: post.likes_count || 0,
-      myStatus: LikeStatus.None,
-      // myStatus: post.user_like_status || LikeStatus.None,
-      newestLikes: [], // post.newest_likes.map((item) =>
-      //   PostViewDto.newestLikeMapToView(item),
-      // ),
+      dislikesCount,
+      likesCount,
+      myStatus,
+      newestLikes: newestLikes.map((item) =>
+        PostViewDto.newestLikeMapToView(item),
+      ),
     };
 
     return dto;
   }
 
-  protected static newestLikeMapToView(like: NewestLikeRaw): NewestLike {
+  protected static newestLikeMapToView(like: Like): NewestLike {
     return {
-      addedAt: like.addedAt,
-      userId: like.userId.toString(),
-      login: like.login,
+      addedAt: like.createdAt.toISOString(),
+      userId: like.author.id.toString(),
+      login: like.author.login,
     };
   }
 }

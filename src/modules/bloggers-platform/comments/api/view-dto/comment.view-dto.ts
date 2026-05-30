@@ -1,5 +1,5 @@
-import { CommentViewRaw } from '../../infrastructure/dto/comment.aggregated-dto';
 import { LikeStatus } from '../../../likes/enums/like-status';
+import { Comment } from '../../domain/comment.entity';
 
 export class CommentViewDto {
   id: string;
@@ -15,21 +15,26 @@ export class CommentViewDto {
   };
   createdAt: string;
 
-  static mapToView(comment: CommentViewRaw) {
+  static mapToView(
+    comment: Comment,
+    myStatus: LikeStatus,
+    likesCount: number,
+    dislikesCount: number,
+  ): CommentViewDto {
     const dto = new CommentViewDto();
 
     dto.id = comment.id.toString();
     dto.content = comment.content;
     dto.commentatorInfo = {
-      userId: comment.user_id.toString(),
-      userLogin: comment.user_login,
+      userId: comment.author.id.toString(),
+      userLogin: comment.author.login,
     };
     dto.likesInfo = {
-      dislikesCount: comment.dislikes_count || 0,
-      likesCount: comment.likes_count || 0,
-      myStatus: comment.user_like_status || LikeStatus.None,
+      dislikesCount,
+      likesCount,
+      myStatus,
     };
-    dto.createdAt = comment.created_at.toISOString();
+    dto.createdAt = comment.createdAt.toISOString();
 
     return dto;
   }

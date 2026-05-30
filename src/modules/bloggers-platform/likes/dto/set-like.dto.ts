@@ -5,5 +5,5 @@ export class SetLikeDto {
   status: LikeStatus;
   userId: number;
   parentId: number;
-  parentEntity: LikeParent;
+  parentType: LikeParent;
 }
