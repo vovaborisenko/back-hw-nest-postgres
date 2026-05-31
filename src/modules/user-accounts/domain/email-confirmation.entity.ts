@@ -4,10 +4,10 @@ import { User } from './user.entity';
 
 @Entity()
 export class EmailConfirmation extends BaseDbEntity {
-  @Column({ type: 'timestamptz', default: new Date(Date.now() + 3.6e6) })
+  @Column({ type: 'timestamptz' })
   expirationDate: Date;
 
-  @Column({ type: 'uuid', default: crypto.randomUUID() })
+  @Column({ type: 'uuid' })
   confirmationCode: string;
 
   @Column({ default: false })

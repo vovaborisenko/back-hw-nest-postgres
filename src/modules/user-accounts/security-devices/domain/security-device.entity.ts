@@ -10,7 +10,7 @@ export class SecurityDevice extends BaseDbEntity {
   @Column()
   deviceName: string;
 
-  @Column({ type: 'uuid', default: crypto.randomUUID() })
+  @Column({ type: 'uuid' })
   deviceId: string;
 
   @Column({ type: 'timestamptz' })

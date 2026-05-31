@@ -7,7 +7,7 @@ export class Recovery extends BaseDbEntity {
   @Column({ type: 'timestamptz' })
   expiredAt: Date;
 
-  @Column({ type: 'uuid', default: crypto.randomUUID() })
+  @Column({ type: 'uuid' })
   code: string;
 
   @OneToOne(() => User, (user) => user.recovery, { nullable: false })
