@@ -12,6 +12,7 @@ import { ThrottlerExceptionFilter } from './core/exceptions/filters/throttler-ex
 import { CoreModule } from './core/core.module';
 import { CoreConfig } from './core/core.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { QuizModule } from './modules/quiz/quiz.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     }),
     UserAccountsModule,
     BloggersPlatformModule,
+    QuizModule,
   ],
   controllers: [AppController],
   providers: [

@@ -33,6 +33,11 @@ export const PATH = {
     PREFIX: 'security/devices',
     SINGLE: `:${PARAM.ID}`,
   },
+  QUESTIONS: {
+    SA_PREFIX: 'sa/quiz/questions',
+    SINGLE: `:${PARAM.ID}`,
+    SINGLE_PUBLISH: `:${PARAM.ID}/publish`,
+  },
   POSTS: {
     PREFIX: 'posts',
     SINGLE: `:${PARAM.ID}`,
