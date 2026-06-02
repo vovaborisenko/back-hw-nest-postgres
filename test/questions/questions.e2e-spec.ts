@@ -71,7 +71,7 @@ describe('QuestionController (e2e)', () => {
         id: expect.any(String),
         published: false,
         createdAt: expect.any(String),
-        updatedAt: expect.any(String),
+        updatedAt: null,
       });
     });
   });
@@ -140,7 +140,10 @@ describe('QuestionController (e2e)', () => {
         .set('Authorization', validAuth)
         .expect(HttpStatus.OK);
 
-      expect(response.body.items[0]).toMatchObject(questionDto[3]);
+      expect(response.body.items[0]).toMatchObject({
+        ...questionDto[3],
+        updatedAt: expect.any(String),
+      });
     });
   });
 
@@ -174,7 +177,7 @@ describe('QuestionController (e2e)', () => {
     it('should return 204 when requested id exist', async () => {
       const [, question2] = await createQuestions(2, app);
 
-      expect(question2).toMatchObject({ published: false });
+      expect(question2).toMatchObject({ published: false, updatedAt: null });
 
       await request(app)
         .put(getPath(FULL_PATH.SA_QUESTION_PUBLISH, question2.id))
@@ -187,7 +190,10 @@ describe('QuestionController (e2e)', () => {
         .set('Authorization', validAuth)
         .expect(HttpStatus.OK);
 
-      expect(response.body.items[0]).toMatchObject({ published: true });
+      expect(response.body.items[0]).toMatchObject({
+        published: true,
+        updatedAt: expect.any(String),
+      });
     });
   });
 });
