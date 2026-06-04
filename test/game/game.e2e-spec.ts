@@ -321,18 +321,20 @@ describe('GameController (e2e)', () => {
       const [{ token }, { token: token2 }] = users;
 
       for (let i = 1; i < game.questions!.length - 1; i++) {
-        await request(app)
+        const resonseAnswer = await request(app)
           .post(FULL_PATH.GAME_ADD_ANSWER)
           .set('Authorization', `Bearer ${token}`)
           .send({ answer: questions[game.questions![i].id].correctAnswers[0] })
           .expect(HttpStatus.OK);
+        expect(resonseAnswer.body.questionId).toBe(game.questions![i].id);
         await wait(1e3);
 
-        await request(app)
+        const resonseAnswer2 = await request(app)
           .post(FULL_PATH.GAME_ADD_ANSWER)
           .set('Authorization', `Bearer ${token2}`)
           .send({ answer: questions[game.questions![i].id].correctAnswers[0] })
           .expect(HttpStatus.OK);
+        expect(resonseAnswer2.body.questionId).toBe(game.questions![i].id);
         await wait(1e3);
       }
 
@@ -377,6 +379,23 @@ describe('GameController (e2e)', () => {
       expect(body.secondPlayerProgress.answers.length).toBe(5);
       expect(body.finishGameDate).toStrictEqual(expect.any(String));
       expect(body.status).toBe(GameStatus.Finished);
-    }, 1e4);
+    });
+  });
+
+  describe(`GET ${FULL_PATH.GAME_CURRENT}`, () => {
+    it('should return 404 for first and second players', async () => {
+      const [{ token }, { token: token2 }] = users;
+
+      const { body: game } = await request(app)
+        .get(FULL_PATH.GAME_CURRENT)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.NOT_FOUND);
+      const { body: game2 } = await request(app)
+        .get(FULL_PATH.GAME_CURRENT)
+        .set('Authorization', `Bearer ${token2}`)
+        .expect(HttpStatus.NOT_FOUND);
+
+      expect(game).toEqual(game2);
+    });
   });
 });

@@ -16,11 +16,11 @@ export class GameQueryRepository {
     private readonly playerProgressRepo: Repository<PlayerProgress>,
   ) {}
 
-  async findCurrent(playerId: number): Promise<GameViewDto | null> {
+  async findCurrent(userId: number): Promise<GameViewDto | null> {
     const gamePlayer = await this.playerProgressRepo.findOne({
       where: {
         game: { status: In([GameStatus.Pending, GameStatus.Active]) },
-        user: { id: playerId },
+        user: { id: userId },
       },
       relations: {
         game: true,
@@ -34,13 +34,13 @@ export class GameQueryRepository {
     return this.findById(gamePlayer.game.id);
   }
 
-  async findCurrentOrNotFoundFail(playerId: number): Promise<GameViewDto> {
-    const game = await this.findCurrent(playerId);
+  async findCurrentOrNotFoundFail(userId: number): Promise<GameViewDto> {
+    const game = await this.findCurrent(userId);
 
     if (!game) {
       throw new DomainException({
         code: DomainExceptionCode.NotFound,
-        message: 'Player does not have active game',
+        message: 'User does not have active game',
       });
     }
 
@@ -72,7 +72,7 @@ export class GameQueryRepository {
     return game;
   }
 
-  async findByIdOrThrow(id: number, playerId: number): Promise<GameViewDto> {
+  async findByIdOrThrow(id: number, userId: number): Promise<GameViewDto> {
     const game = await this.findById(id);
 
     if (!game) {
@@ -86,7 +86,7 @@ export class GameQueryRepository {
       ![
         game.firstPlayerProgress?.player.id,
         game.secondPlayerProgress?.player.id,
-      ].includes(playerId.toString())
+      ].includes(userId.toString())
     ) {
       throw new DomainException({
         code: DomainExceptionCode.Forbidden,

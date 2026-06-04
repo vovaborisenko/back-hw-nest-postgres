@@ -22,6 +22,7 @@ export class GameViewDto {
   static mapToView(dto: Game): GameViewDto {
     const view = new GameViewDto();
     const questions = dto.gameToQuestions;
+    const playerProgresses = dto.playerProgresses.sort((a, b) => a.id - b.id);
 
     view.id = dto.id.toString();
     view.status = dto.status;
@@ -33,12 +34,8 @@ export class GameViewDto {
         ? questions.map(({ question }) => GameViewDto.questionToView(question))
         : null;
 
-    view.firstPlayerProgress = this.playerProgressToView(
-      dto.playerProgresses[0],
-    );
-    view.secondPlayerProgress = this.playerProgressToView(
-      dto.playerProgresses[1],
-    );
+    view.firstPlayerProgress = this.playerProgressToView(playerProgresses[0]);
+    view.secondPlayerProgress = this.playerProgressToView(playerProgresses[1]);
 
     return view;
   }
