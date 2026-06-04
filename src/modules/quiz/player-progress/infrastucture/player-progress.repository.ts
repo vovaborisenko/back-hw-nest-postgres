@@ -18,8 +18,7 @@ export class PlayerProgressRepository {
         game: { status: GameStatus.Active },
       },
       relations: {
-        game: { gameToQuestions: { question: true } },
-        answers: true,
+        game: true,
       },
     });
   }

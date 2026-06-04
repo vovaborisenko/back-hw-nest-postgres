@@ -18,7 +18,7 @@ export class GameRepository {
     return this.gameRepo.findOne({
       where: { id },
       relations: {
-        gameToQuestions: true,
+        gameToQuestions: { question: true },
         playerProgresses: { answers: true },
       },
     });

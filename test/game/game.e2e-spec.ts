@@ -342,7 +342,7 @@ describe('GameController (e2e)', () => {
         .get(getPath(FULL_PATH.GAME, game.id))
         .set('Authorization', `Bearer ${token}`)
         .expect(HttpStatus.OK);
-      console.warn({ body });
+
       expect(body.firstPlayerProgress.score).toBe(3);
       expect(body.secondPlayerProgress.score).toBe(4);
       expect(body.firstPlayerProgress.answers.length).toBe(4);
