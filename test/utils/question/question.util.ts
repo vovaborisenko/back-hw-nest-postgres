@@ -51,6 +51,17 @@ export async function createQuestion(
   return question;
 }
 
+export async function publishQuestion(
+  app: App,
+  questionId: string,
+): Promise<void> {
+  await request(app)
+    .put(FULL_PATH.SA_QUESTION_PUBLISH.replace(':id', questionId))
+    .set('Authorization', validAuth)
+    .send({ published: true })
+    .expect(HttpStatus.NO_CONTENT);
+}
+
 export async function createQuestions(
   count: number,
   app: App,
@@ -64,4 +75,25 @@ export async function createQuestions(
   );
 
   return Promise.all(requests);
+}
+
+export async function createAndPublishQuestions(
+  count: number,
+  app: App,
+  dto: CreateQuestionInputDto = questionDto[0],
+): Promise<Record<string, QuestionViewDto>> {
+  const results: Record<string, QuestionViewDto> = {};
+
+  for (let index = 0; index < count; index++) {
+    const question = await createQuestion(app, {
+      body: `${dto.body}${index}`,
+      correctAnswers: [`${index}`, ...dto.correctAnswers],
+    });
+
+    await publishQuestion(app, question.id);
+
+    results[question.id] = question;
+  }
+
+  return results;
 }

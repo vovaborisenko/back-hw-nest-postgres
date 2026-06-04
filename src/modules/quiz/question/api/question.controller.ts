@@ -11,21 +11,21 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { PATH } from '../../../../../core/constants/paths';
-import { BasicAuthGuard } from '../../../../user-accounts/guards/basic/basic-auth.guard';
-import { GetQuestionsQueryParamsInputDto } from '../input-dto/get-questions.query-params.input-dto';
-import { BasePathParamsInputDto } from '../../../../../core/api/input-dto/base.path-params.input-dto';
-import { CreateQuestionInputDto } from '../input-dto/create-question.input-dto';
-import { UpdateQuestionInputDto } from '../input-dto/update-question.input-dto';
-import { UpdateQuestionStatusInputDto } from '../input-dto/update-question-status.input-dto';
-import { BasePaginatedViewDto } from '../../../../../core/api/view-dto/base.paginated.view-dto';
-import { QuestionViewDto } from '../view-dto/question.view-dto';
-import { QuestionQueryRepository } from '../../infrastructure/question.query-repository';
+import { PATH } from '../../../../core/constants/paths';
+import { BasicAuthGuard } from '../../../user-accounts/guards/basic/basic-auth.guard';
+import { GetQuestionsQueryParamsInputDto } from './input-dto/get-questions.query-params.input-dto';
+import { BasePathParamsInputDto } from '../../../../core/api/input-dto/base.path-params.input-dto';
+import { CreateQuestionInputDto } from './input-dto/create-question.input-dto';
+import { UpdateQuestionInputDto } from './input-dto/update-question.input-dto';
+import { UpdateQuestionStatusInputDto } from './input-dto/update-question-status.input-dto';
+import { BasePaginatedViewDto } from '../../../../core/api/view-dto/base.paginated.view-dto';
+import { QuestionViewDto } from './view-dto/question.view-dto';
+import { QuestionQueryRepository } from '../infrastructure/question.query-repository';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreateQuestionCommand } from '../../application/usecases/create-question.use-case';
-import { DeleteQuestionCommand } from '../../application/usecases/delete-question.use-case';
-import { UpdateQuestionCommand } from '../../application/usecases/update-question.use-case';
-import { UpdateQuestionStatusCommand } from '../../application/usecases/update-question-status.use-case';
+import { CreateQuestionCommand } from '../application/usecases/create-question.use-case';
+import { DeleteQuestionCommand } from '../application/usecases/delete-question.use-case';
+import { UpdateQuestionCommand } from '../application/usecases/update-question.use-case';
+import { UpdateQuestionStatusCommand } from '../application/usecases/update-question-status.use-case';
 
 const { SA_PREFIX, SINGLE, SINGLE_PUBLISH } = PATH.QUESTIONS;
 

@@ -1,7 +1,9 @@
 import { BaseDbEntity } from '../../../../core/domain/baseDbEntity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { QuestionStatus } from '../enums/question-status';
 import { CreateQuestionDomainDto } from './dto/create-question.domain-dto';
+import { GameToQuestion } from '../../game/domain/question-to-game.entity';
+import { Answer } from '../../player-progress/domain/answer.entity';
 
 @Entity()
 export class Question extends BaseDbEntity {
@@ -9,16 +11,22 @@ export class Question extends BaseDbEntity {
   content: string;
 
   @Column({ type: 'jsonb' })
-  answers: string[];
+  keys: string[];
 
   @Column({ type: 'enum', enum: QuestionStatus, default: QuestionStatus.Draft })
   status: QuestionStatus;
+
+  @OneToMany(() => GameToQuestion, (questionToGame) => questionToGame.question)
+  gameToQuestions: GameToQuestion[];
+
+  @OneToMany(() => Answer, (answer) => answer.question)
+  answers: Answer[];
 
   static create(dto: CreateQuestionDomainDto): Question {
     const question = new this();
 
     question.content = dto.body;
-    question.answers = dto.correctAnswers;
+    question.keys = dto.correctAnswers;
 
     return question;
   }

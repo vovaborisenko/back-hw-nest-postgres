@@ -32,7 +32,7 @@ export class QuestionRepository {
     const question = await this.findByIdOrNotFound(id);
 
     question.content = dto.body;
-    question.answers = dto.correctAnswers;
+    question.keys = dto.correctAnswers;
 
     await this.save(question);
   }
@@ -71,5 +71,16 @@ export class QuestionRepository {
     }
 
     return question;
+  }
+
+  async findForGame(count: number = 5): Promise<Question[]> {
+    return this.questionRepo
+      .createQueryBuilder('question')
+      .where('question.status = :status', {
+        status: QuestionStatus.Published,
+      })
+      .orderBy('RANDOM()')
+      .take(count)
+      .getMany();
   }
 }

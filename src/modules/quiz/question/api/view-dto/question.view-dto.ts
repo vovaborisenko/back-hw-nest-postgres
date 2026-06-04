@@ -15,7 +15,7 @@ export class QuestionViewDto {
 
     dto.id = question.id.toString();
     dto.body = question.content;
-    dto.correctAnswers = question.answers;
+    dto.correctAnswers = question.keys;
     dto.published = question.status === QuestionStatus.Published;
     dto.createdAt = question.createdAt.toISOString();
     dto.updatedAt = updatedAt === dto.createdAt ? null : updatedAt;
