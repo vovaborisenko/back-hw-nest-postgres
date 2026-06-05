@@ -7,6 +7,7 @@ import { SecurityDevice } from '../security-devices/domain/security-device.entit
 import { DomainException } from '../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../core/exceptions/domain-exception-code';
 import { Comment } from '../../bloggers-platform/comments/domain/comment.entity';
+import { PlayerProgress } from '../../quiz/player-progress/domain/player-progress.entity';
 
 @Entity()
 export class User extends BaseDbEntity {
@@ -38,6 +39,9 @@ export class User extends BaseDbEntity {
     orphanedRowAction: 'soft-delete',
   })
   comments: Comment[];
+
+  @OneToMany(() => PlayerProgress, (player) => player.user)
+  playerProgresses: PlayerProgress[];
 
   static create(dto: CreateUserDomainDto): User {
     const user = new this();

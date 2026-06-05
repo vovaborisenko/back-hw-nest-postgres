@@ -33,7 +33,7 @@ export class PostsQueryRepository {
       where.blog = { id: options?.blogId };
     }
 
-    if (query.sortBy === PostsSortBy.blogName) {
+    if (query.sortBy === PostsSortBy.BlogName) {
       order.blog = { name: query.sortDirection };
     } else if (query.sortBy) {
       order[query.sortBy] = query.sortDirection;
