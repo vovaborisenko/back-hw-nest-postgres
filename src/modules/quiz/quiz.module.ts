@@ -17,6 +17,7 @@ import { PlayerProgressHandlers } from './player-progress/application';
 import { PlayerProgressRepository } from './player-progress/infrastucture/player-progress.repository';
 import { AnswerQueryRepository } from './player-progress/infrastucture/answer.query-repository';
 import { PlayerProgressQueryRepository } from './player-progress/infrastucture/player-progress.query-repository';
+import { PlayerProgressController } from './player-progress/api/player-progress.controller';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { PlayerProgressQueryRepository } from './player-progress/infrastucture/p
       Answer,
     ]),
   ],
-  controllers: [QuestionController, GameController],
+  controllers: [QuestionController, GameController, PlayerProgressController],
   providers: [
     QuestionRepository,
     QuestionQueryRepository,

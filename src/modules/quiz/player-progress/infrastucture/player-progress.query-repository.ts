@@ -22,7 +22,7 @@ export class PlayerProgressQueryRepository {
         'winsCount',
       )
       .addSelect(
-        `SUM(CASE WHEN pp.gameResult = 'LOSS' THEN 1 ELSE 0 END)`,
+        `SUM(CASE WHEN pp.gameResult = 'LOSE' THEN 1 ELSE 0 END)`,
         'lossesCount',
       )
       .addSelect(

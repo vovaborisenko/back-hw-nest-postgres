@@ -23,7 +23,7 @@ import { CreateAnswerInputDto } from '../../player-progress/api/input-dto/create
 import { GetGamesQueryParamsInputDto } from './input-dto/get-games.query-params.input-dto';
 import { PlayerProgressQueryRepository } from '../../player-progress/infrastucture/player-progress.query-repository';
 
-const { PREFIX, SINGLE, MINE, NEW, CURRENT, ANSWER, STATISTIC } = PATH.GAME;
+const { PREFIX, SINGLE, MINE, NEW, CURRENT, ANSWER } = PATH.GAME;
 
 @UseGuards(JwtAuthGuard)
 @Controller(PREFIX)
@@ -41,11 +41,6 @@ export class GameController {
     @ExtractUserFromRequestDecorator() user: UserContextDto,
   ) {
     return this.gameQueryRepository.findGames(query, user.id);
-  }
-
-  @Get(STATISTIC)
-  getMyStat(@ExtractUserFromRequestDecorator() user: UserContextDto) {
-    return this.playerProgressQueryRepository.getUserStats(user.id);
   }
 
   @Get(CURRENT)

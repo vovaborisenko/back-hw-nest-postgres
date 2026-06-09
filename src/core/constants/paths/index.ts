@@ -40,7 +40,10 @@ export const PATH = {
     MINE: 'my',
     CURRENT: 'my-current',
     ANSWER: 'my-current/answers',
-    STATISTIC: 'my-statistic',
+  },
+  PLAYER_PROGRESS: {
+    PREFIX: 'pair-game-quiz/users',
+    MY_STATS: 'my-statistic',
   },
   QUESTIONS: {
     SA_PREFIX: 'sa/quiz/questions',
@@ -85,7 +88,7 @@ export const FULL_PATH = {
   GAME_NEW: `/${PATH.PREFIX}/${PATH.GAME.PREFIX}/${PATH.GAME.NEW}`,
   GAME_CURRENT: `/${PATH.PREFIX}/${PATH.GAME.PREFIX}/${PATH.GAME.CURRENT}`,
   GAME_ADD_ANSWER: `/${PATH.PREFIX}/${PATH.GAME.PREFIX}/${PATH.GAME.ANSWER}`,
-  GAMES_USER_STATS: `/${PATH.PREFIX}/${PATH.GAME.PREFIX}/${PATH.GAME.STATISTIC}`,
+  GAMES_USER_STATS: `/${PATH.PREFIX}/${PATH.PLAYER_PROGRESS.PREFIX}/${PATH.PLAYER_PROGRESS.MY_STATS}`,
   GAMES_USER: `/${PATH.PREFIX}/${PATH.GAME.PREFIX}/${PATH.GAME.MINE}`,
   //
   SA_QUESTIONS: `/${PATH.PREFIX}/${PATH.QUESTIONS.SA_PREFIX}`,
