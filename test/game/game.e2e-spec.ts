@@ -501,8 +501,8 @@ describe('GameController (e2e)', () => {
         .expect(HttpStatus.OK);
 
       expect(body3).toEqual({
-        sumScore: 6,
-        avgScores: 6,
+        sumScore: 5,
+        avgScores: 5,
         gamesCount: 1,
         drawsCount: 0,
         lossesCount: 0,

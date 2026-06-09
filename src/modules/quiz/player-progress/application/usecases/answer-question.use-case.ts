@@ -105,17 +105,7 @@ export class AnswerQuestionUseCase implements ICommandHandler<AnswerQuestionComm
           relations: { answers: true },
         });
 
-        const playerProgressWithAdditionalPoint =
-          this.findPlayerProgressWithAdditionalPoint(
-            playerProgresses,
-            questionCount,
-          );
-
-        if (playerProgressWithAdditionalPoint) {
-          playerProgressWithAdditionalPoint.score =
-            playerProgressWithAdditionalPoint.score + 1;
-        }
-
+        this.addBonusPoint(playerProgresses);
         this.updatePlayerProgressGameResult(playerProgresses);
 
         await entityManager.save(playerProgresses);
@@ -125,28 +115,49 @@ export class AnswerQuestionUseCase implements ICommandHandler<AnswerQuestionComm
     });
   }
 
-  private findPlayerProgressWithAdditionalPoint(
-    playerProgresses: PlayerProgress[],
-    questionCount: number,
-  ): PlayerProgress | null {
-    return playerProgresses.reduce<PlayerProgress | null>(
-      (result, playerProgress) => {
-        const lastAnswerCreatedAt =
-          result?.answers[questionCount - 1]?.createdAt.valueOf() || Infinity;
+  private findLastAnswer(answers: Answer[]): Answer | undefined {
+    return answers.reduce<Answer | undefined>((lastAnswer, answer) => {
+      const lastAnswerCreatedAt = lastAnswer?.createdAt?.valueOf() || 0;
 
-        if (
-          playerProgress.score > 0 &&
-          playerProgress.answers[questionCount - 1] &&
-          playerProgress.answers[questionCount - 1].createdAt.valueOf() <
-            lastAnswerCreatedAt
-        ) {
+      if (answer.createdAt.valueOf() > lastAnswerCreatedAt) {
+        return answer;
+      }
+
+      return lastAnswer;
+    }, undefined);
+  }
+
+  private findQuickestPlayerProgress(
+    playerProgresses: PlayerProgress[],
+  ): PlayerProgress | undefined {
+    return playerProgresses.reduce<PlayerProgress | undefined>(
+      (result, playerProgress) => {
+        const resultLastAnswerCreatedAt =
+          this.findLastAnswer(result?.answers || [])?.createdAt.valueOf() ||
+          Infinity;
+        const currentLastAnswerCreatedAt =
+          this.findLastAnswer(playerProgress.answers)?.createdAt.valueOf() ||
+          Infinity;
+
+        if (currentLastAnswerCreatedAt < resultLastAnswerCreatedAt) {
           return playerProgress;
         }
 
         return result;
       },
-      null,
+      undefined,
     );
+  }
+
+  private addBonusPoint(playerProgresses: PlayerProgress[]): PlayerProgress[] {
+    const quickestPlayerProgress =
+      this.findQuickestPlayerProgress(playerProgresses);
+
+    if (quickestPlayerProgress && quickestPlayerProgress.score > 0) {
+      quickestPlayerProgress.score += 1;
+    }
+
+    return playerProgresses;
   }
 
   private updatePlayerProgressGameResult(
