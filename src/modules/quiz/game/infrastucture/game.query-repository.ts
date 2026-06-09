@@ -7,6 +7,10 @@ import { DomainException } from '../../../../core/exceptions/domain-exceptions';
 import { DomainExceptionCode } from '../../../../core/exceptions/domain-exception-code';
 import { GameViewDto } from '../api/view-dto/game.view-dto';
 import { PlayerProgress } from '../../player-progress/domain/player-progress.entity';
+import { BasePaginatedViewDto } from '../../../../core/api/view-dto/base.paginated.view-dto';
+import { GamesSortBy } from '../api/input-dto/games.sort-by';
+import { GetGamesQueryParamsInputDto } from '../api/input-dto/get-games.query-params.input-dto';
+import { SortDirection } from '../../../../core/constants/sort-direction';
 
 @Injectable()
 export class GameQueryRepository {
@@ -15,6 +19,82 @@ export class GameQueryRepository {
     @InjectRepository(PlayerProgress)
     private readonly playerProgressRepo: Repository<PlayerProgress>,
   ) {}
+
+  private getSortBy(sortBy: GamesSortBy): string {
+    return (
+      {
+        [GamesSortBy.CreatedAt]: 'createdAt',
+        [GamesSortBy.FinishedAt]: 'finishedAt',
+        [GamesSortBy.StartedAt]: 'startedAt',
+        [GamesSortBy.Status]: 'status',
+      }[sortBy] || sortBy
+    );
+  }
+
+  private getSortDirection(direction: SortDirection) {
+    return direction === SortDirection.Asc ? 'ASC' : 'DESC';
+  }
+
+  async findGames(
+    query: GetGamesQueryParamsInputDto,
+    userId: number,
+  ): Promise<BasePaginatedViewDto<GameViewDto[]>> {
+    const sortBy = this.getSortBy(query.sortBy);
+    const sortDirection = this.getSortDirection(query.sortDirection);
+    const gameIdQb = this.gameRepo
+      .createQueryBuilder('game')
+      .innerJoin(
+        'game.playerProgresses',
+        'progress',
+        'progress.userId = :userId',
+        { userId },
+      )
+      .select('game.id')
+      .orderBy(`game.${sortBy}`, sortDirection);
+
+    if (query.sortBy !== GamesSortBy.CreatedAt) {
+      gameIdQb.addOrderBy('game.createdAt', 'DESC');
+    }
+
+    gameIdQb.addOrderBy('game.id', sortDirection);
+
+    const totalCount = await gameIdQb.getCount();
+
+    const rawIds = await gameIdQb
+      .offset(query.skip)
+      .limit(query.pageSize)
+      .getRawMany<{ game_id: number }>();
+
+    const gameIds = rawIds.map(({ game_id }) => game_id);
+
+    if (gameIds.length === 0) {
+      return BasePaginatedViewDto.mapToView({
+        page: query.pageNumber,
+        size: query.pageSize,
+        totalCount,
+        items: [],
+      });
+    }
+
+    const games = await this.gameRepo.find({
+      where: { id: In(gameIds) },
+      relations: {
+        playerProgresses: { user: true, answers: true },
+        gameToQuestions: { question: true },
+      },
+    });
+
+    const sortedGames = gameIds.flatMap(
+      (id) => games.find((g) => g.id === id) || [],
+    );
+
+    return BasePaginatedViewDto.mapToView({
+      page: query.pageNumber,
+      size: query.pageSize,
+      totalCount,
+      items: sortedGames.map((item) => GameViewDto.mapToView(item)),
+    });
+  }
 
   async findCurrent(userId: number): Promise<GameViewDto | null> {
     const gamePlayer = await this.playerProgressRepo.findOne({

@@ -19,7 +19,9 @@ export class PlayerProgressViewDto {
       id: dto.userId.toString(),
       login: dto.user.login,
     };
-    view.answers = dto.answers.map((answer) => AnswerViewDto.mapToView(answer));
+    view.answers = dto.answers
+      .sort((a, b) => a.id - b.id)
+      .map((answer) => AnswerViewDto.mapToView(answer));
 
     return view;
   }

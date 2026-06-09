@@ -10,6 +10,7 @@ import { GameRepository } from '../../../game/infrastucture/game.repository';
 import { PlayerProgress } from '../../domain/player-progress.entity';
 import { Game } from '../../../game/domain/game.entity';
 import { GameStatus } from '../../../game/enum/game-status';
+import { GameResult } from '../../enum/game-result';
 
 export class AnswerQuestionCommand extends Command<number> {
   constructor(
@@ -97,46 +98,91 @@ export class AnswerQuestionUseCase implements ICommandHandler<AnswerQuestionComm
           { status: GameStatus.Finished, finishedAt: new Date() },
         );
 
-        const playerProgressWithAdditionalPoint =
-          this.findPlayerProgressWithAdditionalPoint(
-            game.playerProgresses,
-            questionCount,
-          );
+        const playerProgresses = await entityManager.find(PlayerProgress, {
+          where: {
+            gameId: game.id,
+          },
+          relations: { answers: true },
+        });
 
-        if (playerProgressWithAdditionalPoint) {
-          await entityManager.update(
-            PlayerProgress,
-            { id: playerProgressWithAdditionalPoint.id },
-            { score: playerProgressWithAdditionalPoint.score + 1 },
-          );
-        }
+        this.addBonusPoint(playerProgresses);
+        this.updatePlayerProgressGameResult(playerProgresses);
+
+        await entityManager.save(playerProgresses);
       }
 
       return savedAnswer.id;
     });
   }
 
-  protected findPlayerProgressWithAdditionalPoint(
-    playerProgresses: PlayerProgress[],
-    questionCount: number,
-  ): PlayerProgress | null {
-    return playerProgresses.reduce<PlayerProgress | null>(
-      (result, playerProgress) => {
-        const lastAnswerCreatedAt =
-          result?.answers[questionCount - 1]?.createdAt.valueOf() || 0;
+  private findLastAnswer(answers: Answer[]): Answer | undefined {
+    return answers.reduce<Answer | undefined>((lastAnswer, answer) => {
+      const lastAnswerCreatedAt = lastAnswer?.createdAt?.valueOf() || 0;
 
-        if (
-          playerProgress.score > 0 &&
-          playerProgress.answers[questionCount - 1] &&
-          playerProgress.answers[questionCount - 1].createdAt.valueOf() >
-            lastAnswerCreatedAt
-        ) {
+      if (answer.createdAt.valueOf() > lastAnswerCreatedAt) {
+        return answer;
+      }
+
+      return lastAnswer;
+    }, undefined);
+  }
+
+  private findQuickestPlayerProgress(
+    playerProgresses: PlayerProgress[],
+  ): PlayerProgress | undefined {
+    return playerProgresses.reduce<PlayerProgress | undefined>(
+      (result, playerProgress) => {
+        const resultLastAnswerCreatedAt =
+          this.findLastAnswer(result?.answers || [])?.createdAt.valueOf() ||
+          Infinity;
+        const currentLastAnswerCreatedAt =
+          this.findLastAnswer(playerProgress.answers)?.createdAt.valueOf() ||
+          Infinity;
+
+        if (currentLastAnswerCreatedAt < resultLastAnswerCreatedAt) {
           return playerProgress;
         }
 
         return result;
       },
-      null,
+      undefined,
     );
+  }
+
+  private addBonusPoint(playerProgresses: PlayerProgress[]): PlayerProgress[] {
+    const quickestPlayerProgress =
+      this.findQuickestPlayerProgress(playerProgresses);
+
+    if (quickestPlayerProgress && quickestPlayerProgress.score > 0) {
+      quickestPlayerProgress.score += 1;
+    }
+
+    return playerProgresses;
+  }
+
+  private updatePlayerProgressGameResult(
+    playerProgresses: PlayerProgress[],
+  ): PlayerProgress[] {
+    const maxScore = playerProgresses.reduce(
+      (result, { score }) => Math.max(result, score),
+      0,
+    );
+    const isDraw = playerProgresses.every(({ score }) => score === maxScore);
+
+    playerProgresses.forEach((playerProgress) => {
+      if (isDraw) {
+        playerProgress.gameResult = GameResult.Draw;
+        return;
+      }
+
+      if (playerProgress.score === maxScore) {
+        playerProgress.gameResult = GameResult.Win;
+        return;
+      }
+
+      playerProgress.gameResult = GameResult.Lose;
+    });
+
+    return playerProgresses;
   }
 }
