@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { PATH } from '../../../../core/constants/paths';
@@ -19,8 +20,10 @@ import { GameQueryRepository } from '../infrastucture/game.query-repository';
 import { AnswerQuestionCommand } from '../../player-progress/application/usecases/answer-question.use-case';
 import { AnswerQueryRepository } from '../../player-progress/infrastucture/answer.query-repository';
 import { CreateAnswerInputDto } from '../../player-progress/api/input-dto/create-answer.input-dto';
+import { GetGamesQueryParamsInputDto } from './input-dto/get-games.query-params.input-dto';
+import { PlayerProgressQueryRepository } from '../../player-progress/infrastucture/player-progress.query-repository';
 
-const { PREFIX, SINGLE, NEW, CURRENT, ANSWER } = PATH.GAME;
+const { PREFIX, SINGLE, MINE, NEW, CURRENT, ANSWER, STATISTIC } = PATH.GAME;
 
 @UseGuards(JwtAuthGuard)
 @Controller(PREFIX)
@@ -29,7 +32,21 @@ export class GameController {
     protected readonly commandBus: CommandBus,
     protected readonly gameQueryRepository: GameQueryRepository,
     protected readonly answerQueryRepository: AnswerQueryRepository,
+    protected readonly playerProgressQueryRepository: PlayerProgressQueryRepository,
   ) {}
+
+  @Get(MINE)
+  getMyGames(
+    @Query() query: GetGamesQueryParamsInputDto,
+    @ExtractUserFromRequestDecorator() user: UserContextDto,
+  ) {
+    return this.gameQueryRepository.findGames(query, user.id);
+  }
+
+  @Get(STATISTIC)
+  getMyStat(@ExtractUserFromRequestDecorator() user: UserContextDto) {
+    return this.playerProgressQueryRepository.getUserStats(user.id);
+  }
 
   @Get(CURRENT)
   getMyCurrent(@ExtractUserFromRequestDecorator() user: UserContextDto) {

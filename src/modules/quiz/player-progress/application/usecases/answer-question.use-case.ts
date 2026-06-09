@@ -10,6 +10,7 @@ import { GameRepository } from '../../../game/infrastucture/game.repository';
 import { PlayerProgress } from '../../domain/player-progress.entity';
 import { Game } from '../../../game/domain/game.entity';
 import { GameStatus } from '../../../game/enum/game-status';
+import { GameResult } from '../../enum/game-result';
 
 export class AnswerQuestionCommand extends Command<number> {
   constructor(
@@ -97,38 +98,46 @@ export class AnswerQuestionUseCase implements ICommandHandler<AnswerQuestionComm
           { status: GameStatus.Finished, finishedAt: new Date() },
         );
 
+        const playerProgresses = await entityManager.find(PlayerProgress, {
+          where: {
+            gameId: game.id,
+          },
+          relations: { answers: true },
+        });
+
         const playerProgressWithAdditionalPoint =
           this.findPlayerProgressWithAdditionalPoint(
-            game.playerProgresses,
+            playerProgresses,
             questionCount,
           );
 
         if (playerProgressWithAdditionalPoint) {
-          await entityManager.update(
-            PlayerProgress,
-            { id: playerProgressWithAdditionalPoint.id },
-            { score: playerProgressWithAdditionalPoint.score + 1 },
-          );
+          playerProgressWithAdditionalPoint.score =
+            playerProgressWithAdditionalPoint.score + 1;
         }
+
+        this.updatePlayerProgressGameResult(playerProgresses);
+
+        await entityManager.save(playerProgresses);
       }
 
       return savedAnswer.id;
     });
   }
 
-  protected findPlayerProgressWithAdditionalPoint(
+  private findPlayerProgressWithAdditionalPoint(
     playerProgresses: PlayerProgress[],
     questionCount: number,
   ): PlayerProgress | null {
     return playerProgresses.reduce<PlayerProgress | null>(
       (result, playerProgress) => {
         const lastAnswerCreatedAt =
-          result?.answers[questionCount - 1]?.createdAt.valueOf() || 0;
+          result?.answers[questionCount - 1]?.createdAt.valueOf() || Infinity;
 
         if (
           playerProgress.score > 0 &&
           playerProgress.answers[questionCount - 1] &&
-          playerProgress.answers[questionCount - 1].createdAt.valueOf() >
+          playerProgress.answers[questionCount - 1].createdAt.valueOf() <
             lastAnswerCreatedAt
         ) {
           return playerProgress;
@@ -138,5 +147,31 @@ export class AnswerQuestionUseCase implements ICommandHandler<AnswerQuestionComm
       },
       null,
     );
+  }
+
+  private updatePlayerProgressGameResult(
+    playerProgresses: PlayerProgress[],
+  ): PlayerProgress[] {
+    const maxScore = playerProgresses.reduce(
+      (result, { score }) => Math.max(result, score),
+      0,
+    );
+    const isDraw = playerProgresses.every(({ score }) => score === maxScore);
+
+    playerProgresses.forEach((playerProgress) => {
+      if (isDraw) {
+        playerProgress.gameResult = GameResult.Draw;
+        return;
+      }
+
+      if (playerProgress.score === maxScore) {
+        playerProgress.gameResult = GameResult.Win;
+        return;
+      }
+
+      playerProgress.gameResult = GameResult.Lose;
+    });
+
+    return playerProgresses;
   }
 }

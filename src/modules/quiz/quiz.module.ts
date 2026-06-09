@@ -16,6 +16,7 @@ import { Answer } from './player-progress/domain/answer.entity';
 import { PlayerProgressHandlers } from './player-progress/application';
 import { PlayerProgressRepository } from './player-progress/infrastucture/player-progress.repository';
 import { AnswerQueryRepository } from './player-progress/infrastucture/answer.query-repository';
+import { PlayerProgressQueryRepository } from './player-progress/infrastucture/player-progress.query-repository';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { AnswerQueryRepository } from './player-progress/infrastucture/answer.qu
     ...GameHandlers,
     ...PlayerProgressHandlers,
     PlayerProgressRepository,
+    PlayerProgressQueryRepository,
     AnswerQueryRepository,
   ],
 })

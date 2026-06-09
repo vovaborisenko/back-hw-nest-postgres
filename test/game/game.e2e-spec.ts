@@ -46,11 +46,13 @@ describe('GameController (e2e)', () => {
   });
 
   it.each`
-    pathTemplate                 | method
-    ${FULL_PATH.GAME}            | ${'get'}
-    ${FULL_PATH.GAME_CURRENT}    | ${'get'}
-    ${FULL_PATH.GAME_NEW}        | ${'post'}
-    ${FULL_PATH.GAME_ADD_ANSWER} | ${'post'}
+    pathTemplate                  | method
+    ${FULL_PATH.GAMES_USER}       | ${'get'}
+    ${FULL_PATH.GAMES_USER_STATS} | ${'get'}
+    ${FULL_PATH.GAME}             | ${'get'}
+    ${FULL_PATH.GAME_CURRENT}     | ${'get'}
+    ${FULL_PATH.GAME_NEW}         | ${'post'}
+    ${FULL_PATH.GAME_ADD_ANSWER}  | ${'post'}
   `(
     'should return 401 when invalid header Authorization: [$method] $pathTemplate',
     async ({
@@ -396,6 +398,116 @@ describe('GameController (e2e)', () => {
         .expect(HttpStatus.NOT_FOUND);
 
       expect(game).toEqual(game2);
+    });
+  });
+
+  describe(`POST ${FULL_PATH.GAME_NEW}`, () => {
+    it('first user connected to second game', async () => {
+      const [{ token }] = users;
+
+      await request(app)
+        .post(FULL_PATH.GAME_NEW)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.OK);
+    });
+  });
+
+  describe(`GET ${FULL_PATH.GAMES_USER}`, () => {
+    it('should return games', async () => {
+      const [{ token }] = users;
+
+      const { body } = await request(app)
+        .get(FULL_PATH.GAMES_USER + '?sortBy=status')
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.OK);
+
+      expect(body).toEqual({
+        items: expect.any(Array),
+        page: 1,
+        pageSize: 10,
+        pagesCount: 1,
+        totalCount: 2,
+      });
+      expect(body.items.length).toBe(2);
+    });
+  });
+
+  describe(`GET ${FULL_PATH.GAMES_USER_STATS}`, () => {
+    it("first player's stats before answer", async () => {
+      const [{ token }] = users;
+
+      const { body } = await request(app)
+        .get(FULL_PATH.GAMES_USER_STATS)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.OK);
+
+      expect(body).toEqual({
+        sumScore: 4,
+        avgScores: 2,
+        gamesCount: 2,
+        drawsCount: 1,
+        lossesCount: 0,
+        winsCount: 0,
+      });
+    });
+
+    it('finish second game', async () => {
+      const [{ token }, , { token: token3 }] = users;
+
+      const { body: game } = await request(app)
+        .get(FULL_PATH.GAME_CURRENT)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.OK);
+
+      for (let i = 0; i < game.questions!.length; i++) {
+        const resonseAnswer = await request(app)
+          .post(FULL_PATH.GAME_ADD_ANSWER)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ answer: '123' })
+          .expect(HttpStatus.OK);
+        expect(resonseAnswer.body.questionId).toBe(game.questions![i].id);
+        await wait(1e3);
+
+        const resonseAnswer2 = await request(app)
+          .post(FULL_PATH.GAME_ADD_ANSWER)
+          .set('Authorization', `Bearer ${token3}`)
+          .send({ answer: questions[game.questions![i].id].correctAnswers[0] })
+          .expect(HttpStatus.OK);
+        expect(resonseAnswer2.body.questionId).toBe(game.questions![i].id);
+        await wait(1e3);
+      }
+    }, 1.1e4);
+
+    it("first, third player's stats after answers", async () => {
+      const [{ token }, , { token: token3 }] = users;
+
+      const { body } = await request(app)
+        .get(FULL_PATH.GAMES_USER_STATS)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.OK);
+
+      expect(body).toEqual({
+        sumScore: 4,
+        avgScores: 2,
+        gamesCount: 2,
+        drawsCount: 1,
+        lossesCount: 1,
+        winsCount: 0,
+      });
+
+      const { body: body3 } = await request(app)
+        .get(FULL_PATH.GAMES_USER_STATS)
+        .set('Authorization', `Bearer ${token3}`)
+        .expect(HttpStatus.OK);
+
+      expect(body3).toEqual({
+        sumScore: 6,
+        avgScores: 6,
+        gamesCount: 1,
+        drawsCount: 0,
+        lossesCount: 0,
+        winsCount: 1,
+      });
     });
   });
 });

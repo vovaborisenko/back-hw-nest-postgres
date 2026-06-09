@@ -22,4 +22,8 @@ export class PlayerProgressRepository {
       },
     });
   }
+
+  findByGame(gameId: number): Promise<PlayerProgress[]> {
+    return this.playerProgressRepo.findBy({ gameId });
+  }
 }
