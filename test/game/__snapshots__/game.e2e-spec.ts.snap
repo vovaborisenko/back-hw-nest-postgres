@@ -1,0 +1,306 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`GameController (e2e) GET /api/pair-game-quiz/users/top default 1`] = `
+{
+  "items": [
+    {
+      "avgScores": 5,
+      "drawsCount": 0,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin2",
+      },
+      "sumScore": 5,
+      "winsCount": 1,
+    },
+    {
+      "avgScores": 4,
+      "drawsCount": 1,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin1",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+    {
+      "avgScores": 2,
+      "drawsCount": 1,
+      "gamesCount": 2,
+      "lossesCount": 1,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin0",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "pagesCount": 1,
+  "totalCount": 3,
+}
+`;
+
+exports[`GameController (e2e) GET /api/pair-game-quiz/users/top pagination 1`] = `
+{
+  "items": [
+    {
+      "avgScores": 2,
+      "drawsCount": 1,
+      "gamesCount": 2,
+      "lossesCount": 1,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin0",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+  ],
+  "page": 2,
+  "pageSize": 2,
+  "pagesCount": 2,
+  "totalCount": 3,
+}
+`;
+
+exports[`GameController (e2e) GET /api/pair-game-quiz/users/top sort= 1`] = `
+{
+  "items": [
+    {
+      "avgScores": 5,
+      "drawsCount": 0,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin2",
+      },
+      "sumScore": 5,
+      "winsCount": 1,
+    },
+    {
+      "avgScores": 4,
+      "drawsCount": 1,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin1",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+    {
+      "avgScores": 2,
+      "drawsCount": 1,
+      "gamesCount": 2,
+      "lossesCount": 1,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin0",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "pagesCount": 1,
+  "totalCount": 3,
+}
+`;
+
+exports[`GameController (e2e) GET /api/pair-game-quiz/users/top sort=avgScores desc&sort=sumScore desc 1`] = `
+{
+  "items": [
+    {
+      "avgScores": 5,
+      "drawsCount": 0,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin2",
+      },
+      "sumScore": 5,
+      "winsCount": 1,
+    },
+    {
+      "avgScores": 4,
+      "drawsCount": 1,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin1",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+    {
+      "avgScores": 2,
+      "drawsCount": 1,
+      "gamesCount": 2,
+      "lossesCount": 1,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin0",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "pagesCount": 1,
+  "totalCount": 3,
+}
+`;
+
+exports[`GameController (e2e) GET /api/pair-game-quiz/users/top sort=gamesCount&sort=sumScore desc 1`] = `
+{
+  "items": [
+    {
+      "avgScores": 5,
+      "drawsCount": 0,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin2",
+      },
+      "sumScore": 5,
+      "winsCount": 1,
+    },
+    {
+      "avgScores": 4,
+      "drawsCount": 1,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin1",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+    {
+      "avgScores": 2,
+      "drawsCount": 1,
+      "gamesCount": 2,
+      "lossesCount": 1,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin0",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "pagesCount": 1,
+  "totalCount": 3,
+}
+`;
+
+exports[`GameController (e2e) GET /api/pair-game-quiz/users/top sort=gamesCount&sort=sumScore desc 2`] = `
+{
+  "items": [
+    {
+      "avgScores": 5,
+      "drawsCount": 0,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin2",
+      },
+      "sumScore": 5,
+      "winsCount": 1,
+    },
+    {
+      "avgScores": 4,
+      "drawsCount": 1,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin1",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+    {
+      "avgScores": 2,
+      "drawsCount": 1,
+      "gamesCount": 2,
+      "lossesCount": 1,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin0",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "pagesCount": 1,
+  "totalCount": 3,
+}
+`;
+
+exports[`GameController (e2e) GET /api/pair-game-quiz/users/top sort=sumScore asc 1`] = `
+{
+  "items": [
+    {
+      "avgScores": 2,
+      "drawsCount": 1,
+      "gamesCount": 2,
+      "lossesCount": 1,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin0",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+    {
+      "avgScores": 4,
+      "drawsCount": 1,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin1",
+      },
+      "sumScore": 4,
+      "winsCount": 0,
+    },
+    {
+      "avgScores": 5,
+      "drawsCount": 0,
+      "gamesCount": 1,
+      "lossesCount": 0,
+      "player": {
+        "id": Any<String>,
+        "login": "myLogin2",
+      },
+      "sumScore": 5,
+      "winsCount": 1,
+    },
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "pagesCount": 1,
+  "totalCount": 3,
+}
+`;
