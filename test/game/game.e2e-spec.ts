@@ -510,4 +510,53 @@ describe('GameController (e2e)', () => {
       });
     });
   });
+
+  describe(`GET ${FULL_PATH.GAMES_TOP_USER_STATS}`, () => {
+    function getSnapshot(body: any) {
+      return {
+        items: body.items.map((item) => ({
+          ...item,
+          player: {
+            ...item.player,
+            id: expect.any(String),
+          },
+        })),
+      };
+    }
+
+    it('default', async () => {
+      const { body } = await request(app)
+        .get(FULL_PATH.GAMES_TOP_USER_STATS)
+        .expect(HttpStatus.OK);
+
+      expect(body).toMatchSnapshot(getSnapshot(body));
+    });
+
+    it('pagination', async () => {
+      const { body } = await request(app)
+        .get(FULL_PATH.GAMES_TOP_USER_STATS)
+        .query({
+          pageSize: 2,
+          pageNumber: 2,
+        })
+        .expect(HttpStatus.OK);
+
+      expect(body).toMatchSnapshot(getSnapshot(body));
+    });
+
+    it.each`
+      sort
+      ${''}
+      ${'avgScores desc&sort=sumScore desc'}
+      ${'gamesCount&sort=sumScore desc'}
+      ${'gamesCount&sort=sumScore desc'}
+      ${'sumScore asc'}
+    `('sort=$sort', async ({ sort }) => {
+      const { body } = await request(app)
+        .get(`${FULL_PATH.GAMES_TOP_USER_STATS}?sort=${sort}`)
+        .expect(HttpStatus.OK);
+
+      expect(body).toMatchSnapshot(getSnapshot(body));
+    });
+  });
 });
